@@ -32,5 +32,15 @@ class UserAccountRepository {
 		}
 	}
 
-}
+	public function loadByUserName($userName) {
+		global $DB;
+		$stat = $DB->prepare("SELECT user_account_information.* FROM user_account_information WHERE username_canonical =:detail");
+		$stat->execute(array( 'detail'=>UserAccountModel::makeCanonicalUserName($userName) ));
+		if ($stat->rowCount() > 0) {
+			$user = new UserAccountModel();
+			$user->setFromDataBaseRow($stat->fetch());
+			return $user;
+		}
+	}
 
+}
