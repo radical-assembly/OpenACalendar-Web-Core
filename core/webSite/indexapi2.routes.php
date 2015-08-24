@@ -64,4 +64,7 @@ $app->post('/api2/event/{slug}/info.json', "siteapi2\controllers\EventController
 	->before($appUserRequired)
 	->before($appUserPermissionCalendarChangeRequired)
 	->assert('slug', '\d+');
-
+$app->post('/api2/event/create.json', "siteapi2\controllers\EventController::createInfoJson")
+	->before($appUserRequired)
+	->before($appUserPermissionCalendarChangeRequired)
+	->assert('slug','\d+');
