@@ -6,6 +6,7 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use repositories\EventRepository;
+use repositories\CountryRepository;
 use models\EventModel;
 use models\SiteModel;
 use models\UserAccountModel;
@@ -135,7 +136,7 @@ class EventController {
 			$event->setIsCancelled($eventData['is_cancelled']);
 			$event->setTimezone("Europe/London"); //TODO
 		 	$countryRepo = new CountryRepository();
-			$event->setCountryId(countryRepo->loadByTwoCharCode("GB")->getId());
+			$event->setCountryId($countryRepo->loadByTwoCharCode("GB")->getId());
 			$event->setUrl($eventData['url']);
 			$event->setTicketUrl($eventData['ticket_url']);
 			$event->setIsVirtual($eventData['is_virtual']);
