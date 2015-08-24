@@ -134,7 +134,8 @@ class EventController {
 			$event->setIsDeleted($eventData['is_deleted']);
 			$event->setIsCancelled($eventData['is_cancelled']);
 			$event->setTimezone("Europe/London"); //TODO
-			$event->setCountryId('GB'); //TODO
+		 	$countryRepo = new CountryRepository();
+			$event->setCountryId(countryRepo->loadByTwoCharCode("GB")->getId());
 			$event->setUrl($eventData['url']);
 			$event->setTicketUrl($eventData['ticket_url']);
 			$event->setIsVirtual($eventData['is_virtual']);
