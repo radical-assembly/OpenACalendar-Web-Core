@@ -6,6 +6,11 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use repositories\EventRepository;
+use models\EventModel;
+use models\SiteModel;
+use models\UserAccountModel;
+use models\EventEditMetaDataModel;
+use \SearchForDuplicateEvents;
 
 /**
  *
@@ -93,6 +98,74 @@ class EventController {
 
 		return json_encode($out);
 	}
+
+	public function createInfoJson (Request $request, Application $app) {
+
+		global $DB;
+
+		// Get default user for event submission
+		$stat = $DB->query("SELECT * FROM user_account_information WHERE username = 'admin'"); // Weak: naked psql query
+		$defaultUser = new UserAccountModel();
+		$defaultUser->setFromDataBaseRow($stat->fetchAll()[0]);
+
+		// Get new slug and event id
+		$stat = $DB->query('SELECT slug FROM event_information'); // Weak: naked psql query
+		$newSlug = end(array_values($stat->fetchAll()))[0] + 1;
+		$stat = $DB->query('SELECT id FROM event_information'); // Weak: naked psql query
+		$newId = end(array_values($stat->fetchAll()))[0] + 1;
+
+		// Create event model and set fields
+		$event = new EventModel();
+		$event->setSiteId($app['currentSite']->getId());
+
+		$data = $request->request->all();
+		$eventData = $data['event_data'] ? (array) json_decode($data['event_data']) : null; // Weak: use of json_decode assumes something about form of the POST data.
+
+		if ($eventData) {
+			$event->setId($newId);
+			$event->setSlug($newSlug);
+			$event->setSummary($eventData['summary']);
+			$event->setDescription($eventData['description']);
+			$utc = new \DateTimeZone('UTC');
+			$event->setStartAt(new \DateTime($eventData['start_at'], $utc));
+			$event->setEndAt(new \DateTime($eventData['end_at'], $utc));
+			$event->setGroupId($eventData['group_id']);
+			$event->setGroupTitle($eventData['group_title']);
+			$event->setIsDeleted($eventData['is_deleted']);
+			$event->setIsCancelled($eventData['is_cancelled']);
+			$event->setTimezone("Europe/London"); //TODO
+			$event->setCountryId('GB'); //TODO
+			$event->setUrl($eventData['url']);
+			$event->setTicketUrl($eventData['ticket_url']);
+			$event->setIsVirtual($eventData['is_virtual']);
+			$event->setIsPhysical($eventData['is_physical']);
+		} else {
+			die("No parameter 'event_data' found!");
+		}
+
+		// Check if event is dupe before continuing
+		$searchForDuplicateEvents = new SearchForDuplicateEvents(
+			$event,
+			$app['currentSite'],
+			$app['config']->findDuplicateEventsShow,
+			$app['config']->findDuplicateEventsThreshhold,
+			is_array($app['config']->findDuplicateEventsNoMatchSummary) ? $app['config']->findDuplicateEventsNoMatchSummary : array()
+		);
+
+		if ($searchForDuplicateEvents->getPossibleDuplicates()) {
+			return json_encode(array('success'=>false, 'msg'=>'Duplicate event exists'));
+		}
+
+		// Create event edit metadata model
+		$user = ($app['currentUser']) ? $app['currentUser'] : $defaultUser;
+		$editMetaData = new EventEditMetaDataModel();
+		$editMetaData->setUserAccount($user);
+
+		// Instantiate event repository and update DB
+		$eventRepo = new EventRepository();
+		$eventRepo->createWithMetaData($event, $app['currentSite'], $editMetaData);
+
+	 	return json_encode(array('success'=>true));
+	}
 	
 }
-
