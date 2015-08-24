@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use repositories\EventRepository;
 use repositories\CountryRepository;
+use repositories\UserAccountRepository;
 use models\EventModel;
 use models\SiteModel;
 use models\UserAccountModel;
@@ -105,15 +106,8 @@ class EventController {
 		global $DB;
 
 		// Get default user for event submission
-		$stat = $DB->query("SELECT * FROM user_account_information WHERE username = 'admin'"); // Weak: naked psql query
-		$defaultUser = new UserAccountModel();
-		$defaultUser->setFromDataBaseRow($stat->fetchAll()[0]);
-
-		// Get new slug and event id
-		$stat = $DB->query('SELECT slug FROM event_information'); // Weak: naked psql query
-		$newSlug = end(array_values($stat->fetchAll()))[0] + 1;
-		$stat = $DB->query('SELECT id FROM event_information'); // Weak: naked psql query
-		$newId = end(array_values($stat->fetchAll()))[0] + 1;
+		$userRepo = new UserAccountRepository();
+		$defaultUser = $userRepo->loadByUserName('admin');
 
 		// Create event model and set fields
 		$event = new EventModel();
@@ -123,8 +117,6 @@ class EventController {
 		$eventData = $data['event_data'] ? (array) json_decode($data['event_data']) : null; // Weak: use of json_decode assumes something about form of the POST data.
 
 		if ($eventData) {
-			$event->setId($newId);
-			$event->setSlug($newSlug);
 			$event->setSummary($eventData['summary']);
 			$event->setDescription($eventData['description']);
 			$utc = new \DateTimeZone('UTC');
