@@ -151,11 +151,17 @@ class EventController {
 					'msg'=>'Multiple duplicate venues detected'
 				));
 			} elseif ($venueDupes && count($venueDupes)>0) {
-				return json_encode(array(
-					'success'=>false,
-				 	'msg'=>'Duplicate venue detected',
-					'duplicate'=>json_encode($venueDupes)
-				));
+				$event->setVenueId($venueDupes->getId());
+			} else {
+				$editMetaData = new VenueEditMetaDataModel();
+				$editMetaData->setUserAccount($defaultUser);
+
+				$venueRepo = new VenueRepository();
+				$venueRepo->createWithMetaData($venue, $app['currentSite'], $editMetaData);
+
+				// Weak: only way I know of getting ID of newly created venue
+				$venueDupes = $searchForDuplicateVenues->getPossibleDuplicates();
+				$event->setVenueId($venueDupes->getId());
 			}
 		}
 
