@@ -105,9 +105,25 @@ class EventController {
 
 		global $DB;
 
+		$data = $request->request->all();
+		$eventData = $data['event_data'] ? (array) json_decode($data['event_data']) : null; // Weak: use of json_decode assumes something about form of the POST data.
+
+		if (!$eventData) {
+			return json_encode(array(
+				'success'=>false,
+				'msg'=>'No parameter \'event_data\' was found.',
+			));
+		};
+
 		// Get default user for event submission
 		$userRepo = new UserAccountRepository();
 		$defaultUser = $userRepo->loadByUserName($eventData['username']);
+		if (!$defaultUser) {
+			return json_encode(array(
+				'success'=>false,
+				'msg'=>'Username passed to server is invalid.'
+			));
+		}
 
 		// Create event model and set fields
 		$event = new EventModel();
@@ -147,7 +163,10 @@ class EventController {
 		);
 
 		if ($searchForDuplicateEvents->getPossibleDuplicates()) {
-			return json_encode(array('success'=>false, 'msg'=>'Duplicate event exists'));
+			return json_encode(array(
+				'success'=>false,
+				'msg'=>'Duplicate event exists'
+			));
 		}
 
 		// Create event edit metadata model
@@ -159,7 +178,9 @@ class EventController {
 		$eventRepo = new EventRepository();
 		$eventRepo->createWithMetaData($event, $app['currentSite'], $editMetaData);
 
-	 	return json_encode(array('success'=>true));
+	 	return json_encode(array(
+			'success'=>true
+		));
 	}
 	
 }
