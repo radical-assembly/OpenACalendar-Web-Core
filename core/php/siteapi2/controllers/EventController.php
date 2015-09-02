@@ -132,6 +132,31 @@ class EventController {
 		// Create country model
 		$countryRepo = new CountryRepository();
 		$country = $countryRepo->loadByTwoCharCode("GB");
+
+		// Create venue model
+		if ($eventData['is_physical']) {
+			$venue = new VenueModel();
+			$venue->setTitle($eventData['venue_name']);
+			$venue->setAddress($eventData['venue_address']);
+			$venue->setAddressCode($eventData['venue_address_code']);
+			$venue->setLat($eventData['venue_lat']);
+			$venue->setLong($eventData['venue_long']);
+			$venue->setCountryId($country->getId());
+
+			$searchForDuplicateVenues = new SearchForDuplicateVenues($venue, $app['currentSite']);
+			$venueDupes = $searchForDuplicateVenues->getPossibleDuplicates();
+			if ($venueDupes && count($venueDupes)>1) {
+				return json_encode(array(
+					'success'=>false,
+					'msg'=>'Multiple duplicate venues detected'
+				));
+			} elseif ($venueDupes && count($venueDupes)>0) {
+				return json_encode(array(
+					'success'=>false,
+				 	'msg'=>'Duplicate venue detected',
+					'duplicate'=>json_encode($venueDupes)
+				));
+			}
 		}
 
 		$event->setSummary($eventData['summary']);
