@@ -49,8 +49,10 @@ class SearchForDuplicateVenues {
 		// Get venues
 		$venueRepoBuilder = new VenueRepositoryBuilder();
 		$venueRepoBuilder->setSite($this->site);
-		$venueRepoBuilder->setCountry($this->venue->getCountryId());
 		$venueRepoBuilder->setIncludeDeleted(true);
+
+		$countryRepo = new CountryRepository();
+		$venueRepoBuilder->setCountry($countryRepo->loadById($this->venue->getCountryId()));
 
 		$venues = $venueRepoBuilder->fetchAll();
 
