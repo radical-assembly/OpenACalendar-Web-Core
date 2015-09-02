@@ -129,29 +129,26 @@ class EventController {
 		$event = new EventModel();
 		$event->setSiteId($app['currentSite']->getId());
 
-		$data = $request->request->all();
-		$eventData = $data['event_data'] ? (array) json_decode($data['event_data']) : null; // Weak: use of json_decode assumes something about form of the POST data.
-
-		if ($eventData) {
-			$event->setSummary($eventData['summary']);
-			$event->setDescription($eventData['description']);
-			$utc = new \DateTimeZone('UTC');
-			$event->setStartAt(new \DateTime($eventData['start_at'], $utc));
-			$event->setEndAt(new \DateTime($eventData['end_at'], $utc));
-			$event->setGroupId($eventData['group_id']);
-			$event->setGroupTitle($eventData['group_title']);
-			$event->setIsDeleted($eventData['is_deleted']);
-			$event->setIsCancelled($eventData['is_cancelled']);
-			$event->setTimezone("Europe/London"); //TODO
-		 	$countryRepo = new CountryRepository();
-			$event->setCountryId($countryRepo->loadByTwoCharCode("GB")->getId());
-			$event->setUrl($eventData['url']);
-			$event->setTicketUrl($eventData['ticket_url']);
-			$event->setIsVirtual($eventData['is_virtual']);
-			$event->setIsPhysical($eventData['is_physical']);
-		} else {
-			die("No parameter 'event_data' found!");
+		// Create country model
+		$countryRepo = new CountryRepository();
+		$country = $countryRepo->loadByTwoCharCode("GB");
 		}
+
+		$event->setSummary($eventData['summary']);
+		$event->setDescription($eventData['description']);
+		$utc = new \DateTimeZone('UTC');
+		$event->setStartAt(new \DateTime($eventData['start_at'], $utc));
+		$event->setEndAt(new \DateTime($eventData['end_at'], $utc));
+		$event->setGroupId($eventData['group_id']);
+		$event->setGroupTitle($eventData['group_title']);
+		$event->setIsDeleted($eventData['is_deleted']);
+		$event->setIsCancelled($eventData['is_cancelled']);
+		$event->setTimezone("Europe/London"); //TODO
+		$event->setCountryId($country->getId());
+		$event->setUrl($eventData['url']);
+		$event->setTicketUrl($eventData['ticket_url']);
+		$event->setIsVirtual($eventData['is_virtual']);
+		$event->setIsPhysical($eventData['is_physical']);
 
 		// Check if event is dupe before continuing
 		$searchForDuplicateEvents = new SearchForDuplicateEvents(
