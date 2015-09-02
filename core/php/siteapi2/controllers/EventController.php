@@ -107,7 +107,7 @@ class EventController {
 
 		// Get default user for event submission
 		$userRepo = new UserAccountRepository();
-		$defaultUser = $userRepo->loadByUserName('admin');
+		$defaultUser = $userRepo->loadByUserName($eventData['username']);
 
 		// Create event model and set fields
 		$event = new EventModel();
