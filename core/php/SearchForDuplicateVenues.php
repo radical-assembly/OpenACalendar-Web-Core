@@ -11,6 +11,7 @@
 use models\VenueModel;
 use models\SiteModel;
 use repositories\builders\VenueRepositoryBuilder;
+use repositories\CountryRepository;
 
 class SearchForDuplicateVenues {
 
@@ -87,9 +88,9 @@ class SearchForDuplicateVenues {
 	}
 
 
-	function getScoreForConsideredEvent(VenueModel $venue) {
+	function getScoreForConsideredVenue(VenueModel $venue) {
 
-		if ($this->venue-getIsDuplicateOfId()) {
+		if ($this->venue->getIsDuplicateOfId()) {
 			return PHP_INT_MAX;
 		}
 
@@ -127,9 +128,6 @@ class SearchForDuplicateVenues {
 				}
 				if ($flag) $score++;
 			}
-		}
-		if ($this->event->getVenueId() && $this->event->getVenueId() == $event->getVenueId()) {
-			$score++;
 		}
 		if ($this->venue->getAreaId() && $this->venue->getAreaId() == $venue->getAreaId()) {
 			$score++;
