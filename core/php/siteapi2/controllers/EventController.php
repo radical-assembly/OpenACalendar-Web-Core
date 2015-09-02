@@ -7,12 +7,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use repositories\EventRepository;
 use repositories\CountryRepository;
+use repositories\VenueRepository;
 use repositories\UserAccountRepository;
 use models\EventModel;
+use models\VenueModel;
 use models\SiteModel;
 use models\UserAccountModel;
 use models\EventEditMetaDataModel;
+use models\VenueEditMetaDataModel;
 use \SearchForDuplicateEvents;
+use \searchForDuplicateVenues;
 
 /**
  *
@@ -138,9 +142,9 @@ class EventController {
 			$venue = new VenueModel();
 			$venue->setTitle($eventData['venue_name']);
 			$venue->setAddress($eventData['venue_address']);
-			$venue->setAddressCode($eventData['venue_address_code']);
+			$venue->setAddressCode($eventData['venue_code']);
 			$venue->setLat($eventData['venue_lat']);
-			$venue->setLong($eventData['venue_long']);
+			$venue->setLng($eventData['venue_long']);
 			$venue->setCountryId($country->getId());
 
 			$searchForDuplicateVenues = new SearchForDuplicateVenues($venue, $app['currentSite']);
@@ -151,7 +155,7 @@ class EventController {
 					'msg'=>'Multiple duplicate venues detected'
 				));
 			} elseif ($venueDupes && count($venueDupes)>0) {
-				$event->setVenueId($venueDupes->getId());
+				$event->setVenueId($venueDupes[0]->getId());
 			} else {
 				$editMetaData = new VenueEditMetaDataModel();
 				$editMetaData->setUserAccount($defaultUser);
@@ -161,7 +165,7 @@ class EventController {
 
 				// Weak: only way I know of getting ID of newly created venue
 				$venueDupes = $searchForDuplicateVenues->getPossibleDuplicates();
-				$event->setVenueId($venueDupes->getId());
+				$event->setVenueId($venueDupes[0]->getId());
 			}
 		}
 
