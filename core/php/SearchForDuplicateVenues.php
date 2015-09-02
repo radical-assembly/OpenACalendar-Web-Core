@@ -94,12 +94,11 @@ class SearchForDuplicateVenues {
 		$score = 0;
 
 		if ($this->venue->hasLatLng() && $venue->hasLatLng()) {
-			$compFunc = function($a,$b) {
-				if (abs($b)< 1e-10) return INF;
-				return abs(1 - float($a)/float($b));
-			}
-			if ($compFunc($this->venue->getLat(), $venue->getLat()) && $compFunc($this->venue->getLong(), $venue->getLong())) {
-				$score+=2;
+			$isEqualLat = abs( 1 - (float)$this->venue->getLat() / (float)$venue->getLat() ) < 1e-10;
+			$isEqualLng = abs( 1 - (float)$this->venue->getLng() / (float)$venue->getLng() ) < 1e-10;
+			if ($isEqualLat && $isEqualLng) {
+				$score++;
+				$score++;
 			}
 		}
 
