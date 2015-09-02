@@ -192,9 +192,8 @@ class EventController {
 		}
 
 		// Create event edit metadata model
-		$user = ($app['currentUser']) ? $app['currentUser'] : $defaultUser;
 		$editMetaData = new EventEditMetaDataModel();
-		$editMetaData->setUserAccount($user);
+		$editMetaData->setUserAccount($defaultUser);
 
 		// Instantiate event repository and update DB
 		$eventRepo = new EventRepository();
