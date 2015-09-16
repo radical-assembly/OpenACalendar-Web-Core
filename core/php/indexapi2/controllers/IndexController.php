@@ -11,6 +11,7 @@ use repositories\UserInAPI2ApplicationRepository;
 use repositories\UserAccountRepository;
 use models\API2ApplicationUserPermissionsModel;
 use models\API2ApplicationRequestTokenModel;
+use models\UserAccountModel;
 use Symfony\Component\HttpFoundation\Request;
 use indexapi2\forms\LogInUserForm;
 
@@ -23,15 +24,15 @@ use indexapi2\forms\LogInUserForm;
  * @author James Baster <james@jarofgreen.co.uk>
  */
 class IndexController {
-	
+
 	function index(Application $app) {
-		
+
 		return "TODO";
-		
+
 	}
-	
+
 	function requestTokenJson(Application $app) {
-		
+
 		$data = array_merge($_GET, $_POST);
 
 		if (!$app['apiApp'] || !$app['apiAppLoadedBySecret']) {
@@ -40,7 +41,7 @@ class IndexController {
 			));
 		}
 
-		
+
 		// Settings
 		$requestToken = new \models\API2ApplicationRequestTokenModel();
 		if ($app['apiApp']->getIsCallbackUrl() && isset($data['callback_url']) && trim($data['callback_url'])) {
@@ -60,30 +61,30 @@ class IndexController {
 			$requestToken->setIsCallbackJavascript(true);
 		}
 		// $requestToken->setUserId();  TODO
-		
+
 		$scopeArray = isset($data['scope']) ? explode(",", str_replace(" ", ",", $data['scope'])) : array();
 		$requestToken->setIsEditor(in_array('permission_editor', $scopeArray) && $app['apiApp']->getIsEditor());
 
 		$requestToken->setStateFromUser(isset($data['state']) ? $data['state'] : null);
-		
-		// Check 
+
+		// Check
 		if (!$requestToken->isAnyCallbackSet()) {
 			return json_encode(array(
 				'success'=>false,
 				'error_message'=>'You must pass a callback',
 			));
 		}
-		
+
 		// Generate Token
 		$tokenRepo = new API2ApplicationRequestTokenRepository();
 		$token = $tokenRepo->create($app['apiApp'], $requestToken);
-		
+
 		return json_encode(array(
 			'success'=>true,
 			'request_token'=>$token->getRequestToken(),
 		));
 	}
-	
+
 	function login(Request $request, Application $app) {
 		if (!$app['apiApp']) {
 			return $app['twig']->render('indexapi2/index/login.app.problem.html.twig', array());
@@ -92,9 +93,9 @@ class IndexController {
 		$appRequestTokenRepo = new API2ApplicationRequestTokenRepository();
 		$userAuthorisationTokenRepo =  new API2ApplicationUserAuthorisationTokenRepository();
 		$userInApp2Repo = new UserInAPI2ApplicationRepository();
-		
+
 		######################################## Check Data In
-		
+
 		// Load and check request token!
 		$data = array();
 		if ($app['websession']->has('api2requestToken')) $data['request_token'] = $app['websession']->get('api2requestToken');
@@ -110,18 +111,19 @@ class IndexController {
 		$app['websession']->set('api2appToken', $app['apiApp']->getAppToken());
 		$app['websession']->set('api2requestToken', $requestToken->getRequestToken());
 
-		
+
 		######################################## User Workflow
-		
-		$formObj = new LogInUserForm($app['currentUser'], $app['apiApp'], $requestToken);
+
+		$usr = ($app['currentUser']) ? $app['currentUser'] : new UserAccountModel();
+		$formObj = new LogInUserForm($usr, $app['apiApp'], $requestToken);
 		$form = $app['form.factory']->create($formObj);
-		
+
 		if ('POST' == $request->getMethod()) {
 			$form->bind($request);
 
 			if ($form->isValid()) {
 				$formData = $form->getData();
-				
+
 				$userRepository = new UserAccountRepository();
 				if ($formData['email']) {
 					$user = $userRepository->loadByEmail($formData['email']);
@@ -130,7 +132,7 @@ class IndexController {
 				}
 				if ($user) {
 					if ($user->checkPassword($formData['password'])) {
-						
+
 						if ($app['apiApp']->getIsAutoApprove()) {
 							$permissionsGranted->setFromApp($app['apiApp']);
 						} else {
@@ -138,7 +140,7 @@ class IndexController {
 						}
 						$userInApp2Repo->setPermissionsForUserInApp($permissionsGranted, $user, $app['apiApp']);
 						$userAuthorisationToken = $userAuthorisationTokenRepo->createForAppAndUserFromRequestToken($app['apiApp'], $user, $requestToken);
-						
+
 					} else {
 						$app['monolog']->addError("Login attempt on API2 - account ".$user->getId().' - password wrong.');
 						$form->addError(new FormError('User and password not recognised'));
@@ -147,10 +149,10 @@ class IndexController {
 					$app['monolog']->addError("Login attempt on API2 - unknown account");
 					$form->addError(new FormError('User and password not recognised'));
 				}
-				
+
 			}
 		}
-		
+
 		if (!$userAuthorisationToken) {
 			return $app['twig']->render('indexapi2/index/login.html.twig', array(
 						'form'=>$form->createView(),
@@ -158,11 +160,11 @@ class IndexController {
 						'askForPermissionEditor' => $formObj->getIsEditor(),
 					));
 		}
-		
-		
-		
+
+
+
 		###################################### Return
-		
+
 		if ($requestToken->getCallbackUrl()) {
 			if ($userAuthorisationToken) {
 				return $app->redirect($requestToken->getCallbackUrlWithParams(array(
@@ -196,11 +198,11 @@ class IndexController {
 		} else {
 			return "No Callback was given!";
 		}
-		
-		
+
+
 		return "???";
 	}
-	
+
 	public function userTokenJson(Application $app) {
 		$appRepo = new API2ApplicationRepository();
 		$appRequestTokenRepo = new API2ApplicationRequestTokenRepository();
@@ -224,7 +226,7 @@ class IndexController {
 					'success'=>false,
 				));
 		}
-		
+
 		// get user tokens
 		$userTokenRepo->createForAppAndUserId($app['apiApp'], $authorisationToken->getUserId());
 		$userToken = $userTokenRepo->loadByAppAndUserID($app['apiApp'], $authorisationToken->getUserId());
@@ -241,16 +243,16 @@ class IndexController {
 					'user_secret'=>$userToken->getUserSecret(),
 				));
 		} else {
-			// This might happen if user redraws permissions from app between logging in and app gotting tokens, 
+			// This might happen if user redraws permissions from app between logging in and app gotting tokens,
 			//   since loadByAppAndUserID() checks user permisisons.
 			return json_encode(array(
 					'success'=>false,
 				));
 		}
-		
+
 	}
-	
-	
+
+
 	public function currentUserJson(Application $app) {
 
 		return json_encode(array(
@@ -263,8 +265,8 @@ class IndexController {
 				)
 			));
 	}
-	
-	
+
+
 }
 
 
