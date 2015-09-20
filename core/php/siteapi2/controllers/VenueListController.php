@@ -15,32 +15,35 @@ use repositories\builders\VenueRepositoryBuilder;
  * @copyright (c) 2013-2014, JMB Technology Limited, http://jmbtechnology.co.uk/
  * @author James Baster <james@jarofgreen.co.uk>
  */
-class VenueListController 
+class VenueListController
 {
-	
+
 	public function listJson (Request $request, Application $app) {
-		
+
 		$vrb = new VenueRepositoryBuilder();
 		$vrb->setSite($app['currentSite']);
-				
+
 		$ourRequest = new \Request($request);
 		$vrb->setIncludeDeleted($ourRequest->getGetOrPostBoolean('include_deleted', false));
-		
+
 		$out = array ('venues'=> array());
-		
+
 		foreach($vrb->fetchAll() as $venue) {
 			$out['venues'][] = array(
 				'slug'=>$venue->getSlug(),
 				'slugForURL'=>$venue->getSlugForUrl(),
 				'title'=>$venue->getTitle(),
+				'lat'=>$venue->getLat(),
+				'lng'=>$venue->getLng(),
+				'cachedFutureEvents'=>$venue->getCachedFutureEvents(),
 			);
 		}
-		
-		return json_encode($out);		
-		
-		
+
+		return json_encode($out);
+
+
 	}
-	
+
 }
 
 
