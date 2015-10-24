@@ -27,32 +27,32 @@ use \searchForDuplicateVenues;
  * @author James Baster <james@jarofgreen.co.uk>
  */
 class EventController {
-	
+
 	/** @var \models\EventModel **/
 	protected $event;
 
 	protected function build($slug, Request $request, Application $app) {
 
-		
-		
+
+
 		$repo = new EventRepository();
 		$this->event = $repo->loadBySlug($app['currentSite'], $slug);
 		if (!$this->event) {
 			return false;
 		}
-		
+
 		return true;
-		
-		
+
+
 	}
-	
+
 
 
 	public function infoJson ($slug, Request $request, Application $app) {
 		if (!$this->build($slug, $request, $app)) {
 			$app->abort(404, "Does not exist.");
 		}
-		
+
 		$out = array(
 			'event'=>array(
 				'slug'=>$this->event->getSlug(),
@@ -64,7 +64,7 @@ class EventController {
 				'ticket_url'=>$this->event->getTicketUrl(),
 			),
 		);
-		
+
 		return json_encode($out);
 	}
 
@@ -119,16 +119,6 @@ class EventController {
 			));
 		};
 
-		// Get default user for event submission
-		$userRepo = new UserAccountRepository();
-		$defaultUser = $userRepo->loadByUserName($eventData['username']);
-		if (!$defaultUser) {
-			return json_encode(array(
-				'success'=>false,
-				'msg'=>'Username passed to server is invalid.'
-			));
-		}
-
 		// Create event model and set fields
 		$event = new EventModel();
 		$event->setSiteId($app['currentSite']->getId());
@@ -159,7 +149,7 @@ class EventController {
 				$event->setVenueId($venueDupes[0]->getId());
 			} else {
 				$editMetaData = new VenueEditMetaDataModel();
-				$editMetaData->setUserAccount($defaultUser);
+				$editMetaData->setUserAccount($app['apiUser']);
 
 				$venueRepo = new VenueRepository();
 				$venueRepo->createWithMetaData($venue, $app['currentSite'], $editMetaData);
@@ -204,7 +194,7 @@ class EventController {
 
 		// Create event edit metadata model
 		$editMetaData = new EventEditMetaDataModel();
-		$editMetaData->setUserAccount($defaultUser);
+		$editMetaData->setUserAccount($app['apiUser']);
 
 		// Instantiate event repository and update DB
 		$eventRepo = new EventRepository();
@@ -214,5 +204,5 @@ class EventController {
 			'success'=>true
 		));
 	}
-	
+
 }
