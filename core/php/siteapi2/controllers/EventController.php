@@ -110,7 +110,7 @@ class EventController {
 		global $DB;
 
 		$data = $request->request->all();
-		$eventData = $data['event_data'] ? (array) json_decode($data['event_data']) : null; // Weak: use of json_decode assumes something about form of the POST data.
+		$eventData = $data['event_data'];
 
 		if (!$eventData) {
 			return json_encode(array(
@@ -137,14 +137,15 @@ class EventController {
 		$countryRepo = new CountryRepository();
 		$country = $countryRepo->loadByTwoCharCode("GB");
 
-		// Create venue model
-		if ($eventData['is_physical']) {
+		// Create venue model only if physical event
+		// Strict comparison to prevent truthy values causing venue creation
+		if ($eventData['is_physical'] === true) {
 			$venue = new VenueModel();
 			$venue->setTitle($eventData['venue_name']);
 			$venue->setAddress($eventData['venue_address']);
 			$venue->setAddressCode($eventData['venue_code']);
 			$venue->setLat($eventData['venue_lat']);
-			$venue->setLng($eventData['venue_long']);
+			$venue->setLng($eventData['venue_lng']);
 			$venue->setCountryId($country->getId());
 
 			$searchForDuplicateVenues = new SearchForDuplicateVenues($venue, $app['currentSite']);
