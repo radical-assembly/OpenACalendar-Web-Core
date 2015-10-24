@@ -119,6 +119,12 @@ class EventController {
 			));
 		};
 
+		// Type conversion
+		$eventData['is_physical'] = $eventData['is_physical'] === 'true';
+		$eventData['is_virtual'] = $eventData['is_virtual'] === 'true';
+		$eventData['is_deleted'] = $eventData['is_deleted'] === 'true';
+		$eventData['is_cancelled'] = $eventData['is_cancelled'] === 'true';
+
 		// Create event model and set fields
 		$event = new EventModel();
 		$event->setSiteId($app['currentSite']->getId());
@@ -128,8 +134,7 @@ class EventController {
 		$country = $countryRepo->loadByTwoCharCode("GB");
 
 		// Create venue model only if physical event
-		// Strict comparison to prevent truthy values causing venue creation
-		if ($eventData['is_physical'] === true) {
+		if ($eventData['is_physical']) {
 			$venue = new VenueModel();
 			$venue->setTitle($eventData['venue_name']);
 			$venue->setAddress($eventData['venue_address']);
