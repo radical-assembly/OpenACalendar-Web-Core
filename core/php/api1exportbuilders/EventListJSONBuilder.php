@@ -8,6 +8,7 @@ use models\GroupModel;
 use models\VenueModel;
 use models\AreaModel;
 use models\CountryModel;
+use repositories\builders\TagRepositoryBuilder;
 
 /**
  *
@@ -21,32 +22,32 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 	use TraitJSON;
 
 	public $otherData = array();
-	
-	
+
+
 	public function __construct(SiteModel $site = null, $timeZone  = null) {
 		parent::__construct($site, $timeZone);
 		$this->eventRepositoryBuilder->setAfterNow();
 	}
 
-	
+
 	public function getContents() {
 		global $CONFIG;
-		$out = array_merge($this->otherData, array( 
-			'data'=>$this->events , 
+		$out = array_merge($this->otherData, array(
+			'data'=>$this->events ,
 			'localtimezone'=>$this->localTimeZone->getName(),
 		));
 		return json_encode($out);
 	}
-	
+
 	public function addEvent(EventModel $event, $groups = array(), VenueModel $venue = null,
 							 AreaModel $area = null, CountryModel $country = null, $eventMedias = array()) {
 		global $CONFIG;
-		
+
 		$out = array(
 			'slug'=>$event->getSlug(),
 			'slugforurl'=>$event->getSlugForUrl(),
-			'summary'=> $event->getSummary(),					
-			'summaryDisplay'=> $event->getSummaryDisplay(),			
+			'summary'=> $event->getSummary(),
+			'summaryDisplay'=> $event->getSummaryDisplay(),
 			'description'=> ($event->getDescription()?$event->getDescription():''),
 			'deleted'=> (boolean)$event->getIsDeleted(),
 			'cancelled'=> (boolean)$event->getIsCancelled(),
@@ -54,7 +55,7 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 			'is_virtual'=> (boolean)$event->getIsVirtual(),
 			'custom_fields'=> array(),
 		);
-		
+
 		$out['siteurl'] = $CONFIG->isSingleSiteMode ?
 				'http://'.$CONFIG->webSiteDomain.'/event/'.$event->getSlugForUrl() :
 				'http://'.($this->site?$this->site->getSlug():$event->getSiteSlug()).".".$CONFIG->webSiteDomain.'/event/'.$event->getSlugForUrl();
@@ -83,10 +84,10 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 				'daytimezone'=>$startTimeZone->format('j'),
 				'hourtimezone'=>$startTimeZone->format('G'),
 				'minutetimezone'=>$startTimeZone->format('i'),
-			
+
 			);
-		
-		
+
+
 		$endLocal = clone $event->getEndAt();
 		$endLocal->setTimeZone($this->localTimeZone);
 		$endTimeZone = clone $event->getEndAt();
@@ -109,7 +110,7 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 				'hourtimezone'=>$endTimeZone->format('G'),
 				'minutetimezone'=>$endTimeZone->format('i'),
 			);
-		
+
 		if (is_array($groups)) {
 			$out['groups'] = array();
 			foreach($groups as $group) {
@@ -120,7 +121,7 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 					);
 			}
 		}
-		
+
 		if ($venue) {
 			$out['venue'] = array(
 				'slug'=>$venue->getSlug(),
@@ -132,19 +133,32 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 				'lng'=>$venue->getLng(),
 				);
 		}
-		
+
 		if ($area) {
 			$out['areas'] = array(array(
 				'slug'=>$area->getSlug(),
 				'title'=>$area->getTitle(),
 			));
 		}
-		
+
 		if ($country) {
 			$out['country'] = array(
 				'title'=>$country->getTitle(),
 			);
 		}
+
+		$trb = new TagRepositoryBuilder();
+		$trb->setSite($this->site);
+		$trb->setIncludeDeleted(false);
+		$trb->setTagsForEvent($event);
+		$tags = $trb->fetchAll();
+		$tmp = array();
+		foreach ($tags as $tag) {
+			if (! $tag->getIsDeleted()) {
+				$tmp[] = array($tag->getTitle()=>$tag->getDescription());
+			}
+		}
+		$out['tags'] = $tmp;
 
 		if (is_array($eventMedias)) {
 			$out['medias'] = array();
@@ -172,7 +186,7 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 
 		$this->events[] = $out;
 	}
-	
+
 	public function addOtherDataVenue(VenueModel $venue) {
 		$this->otherData['venue'] = array(
 			'slug'=>$venue->getId(),
