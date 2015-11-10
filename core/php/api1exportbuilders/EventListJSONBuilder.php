@@ -155,7 +155,7 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 		$tmp = array();
 		foreach ($tags as $tag) {
 			if (! $tag->getIsDeleted()) {
-				$tmp[] = array($tag->getTitle()=>$tag->getDescription());
+				$tmp[] = $tag->getTitle();
 			}
 		}
 		$out['tags'] = $tmp;
