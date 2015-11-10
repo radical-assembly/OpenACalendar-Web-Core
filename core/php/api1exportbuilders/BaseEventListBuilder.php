@@ -18,13 +18,13 @@ use repositories\builders\MediaRepositoryBuilder;
  * @author James Baster <james@jarofgreen.co.uk>
  */
 abstract class BaseEventListBuilder  extends BaseBuilder {
-	
+
 	protected $eventRepositoryBuilder;
-	
+
 	protected $events = array();
 
-
 	protected $includeEventMedias = false;
+	protected $includeGroups = false;
 
 	/**
 	 * @param boolean $includeEventMedias
@@ -42,6 +42,21 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		return $this->includeEventMedias;
 	}
 
+	/**
+	 * @param boolean $includeGroups
+	 */
+	public function setIncludeGroups($includeGroups)
+	{
+		$this->includeEventMedias = $includeGroups;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getIncludeGroups()
+	{
+		return $this->$includeGroups;
+	}
 
 
 	public function __construct(SiteModel $site = null, $timeZone = null, $title = null) {
@@ -58,7 +73,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	abstract public function addEvent(EventModel $event, $groups = array(), VenueModel $venue = null,
 									  AreaModel $area = null, CountryModel $country = null, $eventMedias = array());
 
-	
+
 	public function build() {
 		foreach($this->eventRepositoryBuilder->fetchAll() as $event) {
 			$eventMedias = null;
@@ -68,13 +83,19 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 				$mrb->setIncludeDeleted(false);
 				$eventMedias = $mrb->fetchAll();
 			}
-			$this->addEvent($event, null, $event->getVenue(), $event->getArea(), $event->getCountry(), $eventMedias);
+			if ($this->includeGroups) {
+				$grb = new GroupRepositoryBuilder();
+				$grb->setEvent($event);
+				$grb->setIncludeDeleted(false);
+				$eventGroups = $grb->fetchAll();
+			}
+			$this->addEvent($event, $eventGroups, $event->getVenue(), $event->getArea(), $event->getCountry(), $eventMedias);
 		}
 	}
-		
+
 	public function getEventRepositoryBuilder() { return $this->eventRepositoryBuilder; }
 
 
-	
+
 }
 
