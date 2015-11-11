@@ -26,6 +26,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 
 	protected $includeEventMedias = false;
 	protected $includeGroups = false;
+	protected $includeTags = false;
 
 	/**
 	 * @param boolean $includeEventMedias
@@ -59,6 +60,22 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		return $this->$includeGroups;
 	}
 
+	/**
+	 * @param boolean $includeTags
+	 */
+	public function setIncludeTags($includeTags)
+	{
+		$this->$includeTags = $includeTags;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getIncludeTags()
+	{
+		return $this->$includeTags;
+	}
+
 
 	public function __construct(SiteModel $site = null, $timeZone = null, $title = null) {
 		parent::__construct($site, $timeZone, $title);
@@ -67,12 +84,11 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		$this->eventRepositoryBuilder->setLimit($CONFIG->api1EventListLimit);
 		$this->eventRepositoryBuilder->setIncludeCountryInformation(true);
 		$this->eventRepositoryBuilder->setIncludeAreaInformation(true);
-		$this->eventRepositoryBuilder->setIncludeVenueInformation(true);
 		if ($site) $this->eventRepositoryBuilder->setSite($site);
 	}
 
 	abstract public function addEvent(EventModel $event, $groups = array(), VenueModel $venue = null,
-									  AreaModel $area = null, CountryModel $country = null, $eventMedias = array());
+									  AreaModel $area = null, CountryModel $country = null, $eventTags = array(), $eventMedias = array());
 
 
 	public function build() {
@@ -90,7 +106,14 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 				$grb->setIncludeDeleted(false);
 				$eventGroups = $grb->fetchAll();
 			}
-			$this->addEvent($event, $eventGroups, $event->getVenue(), $event->getArea(), $event->getCountry(), $eventMedias);
+			if ($this->includeTags) {
+				$trb = new TagRepositoryBuilder();
+				$trb->setSite($this->site);
+				$trb->setIncludeDeleted(false);
+				$trb->setTagsForEvent($event);
+				$eventTags = $trb->fetchAll();
+			}
+			$this->addEvent($event, $eventGroups, $event->getVenue(), $event->getArea(), $event->getCountry(), $eventTags, $eventMedias);
 		}
 	}
 

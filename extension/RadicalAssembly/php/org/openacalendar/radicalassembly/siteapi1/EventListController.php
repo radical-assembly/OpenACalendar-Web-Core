@@ -69,7 +69,8 @@ class EventListController {
 		$json = new EventListJSONBuilder($app['currentSite'], $app['currentTimeZone']);
 		$json->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
 		$json->setIncludeEventMedias($ourRequest->getGetOrPostBoolean("includeMedias", false));
-        $json->setIncludeGroups($ourRequest->getGetOrPostBoolean("includeGroups", true))
+        $json->setIncludeGroups($ourRequest->getGetOrPostBoolean("includeGroups", true));
+		$json->setIncludeTags($ourRequest->getGetOrPostBoolean("includeTags", true));
 		$json->build();
 		return $json->getResponse();
 

@@ -40,7 +40,8 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 	}
 
 	public function addEvent(EventModel $event, $groups = array(), VenueModel $venue = null,
-							 AreaModel $area = null, CountryModel $country = null, $eventMedias = array()) {
+							 AreaModel $area = null, CountryModel $country = null,
+							 $eventTags = array(), $eventMedias = array()) {
 		global $CONFIG;
 
 		$out = array(
@@ -147,18 +148,14 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 			);
 		}
 
-		$trb = new TagRepositoryBuilder();
-		$trb->setSite($this->site);
-		$trb->setIncludeDeleted(false);
-		$trb->setTagsForEvent($event);
-		$tags = $trb->fetchAll();
-		$tmp = array();
-		foreach ($tags as $tag) {
-			if (! $tag->getIsDeleted()) {
-				$tmp[] = $tag->getTitle();
+		if (is_array($eventTags)) {
+			$out['tags'] = array();
+			foreach ($tags as $tag) {
+				if (! $tag->getIsDeleted()) {
+					$out['tags'][] = $tag->getTitle();
+				}
 			}
 		}
-		$out['tags'] = $tmp;
 
 		if (is_array($eventMedias)) {
 			$out['medias'] = array();
