@@ -30,7 +30,7 @@ class VenueListController
 		$ourRequest = new \Request($request);
 		$vrb->setIncludeDeleted($ourRequest->getGetOrPostBoolean('include_deleted', false));
 
-        $listTitle = $ourRequest->getGetOrPostString('list', 'adminapproved')
+        $listTitle = $ourRequest->getGetOrPostString('list', 'adminapproved');
 
 		$out = array ('venues'=> array());
 
