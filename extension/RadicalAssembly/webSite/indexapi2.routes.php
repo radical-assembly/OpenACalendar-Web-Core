@@ -9,7 +9,6 @@
  */
 
 
-$app->post('/api2/radicalassembly/list/{slug}/event/create.json', "org\openacalendar\\radicalassembly\siteapi2\controllers\EventController::createJson")
+$app->post('/api2/radicalassembly/event/create.json', "org\openacalendar\\radicalassembly\siteapi2\controllers\EventController::createJson")
     	->before($appUserRequired)
-    	->before($appUserPermissionCalendarChangeRequired)
-    	->assert('slug', FRIENDLY_SLUG_REGEX);
+    	->before($appUserPermissionCalendarChangeRequired);
