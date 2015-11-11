@@ -49,7 +49,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	 */
 	public function setIncludeGroups($includeGroups)
 	{
-		$this->$includeGroups = $includeGroups;
+		$this->includeGroups = $includeGroups;
 	}
 
 	/**
@@ -57,7 +57,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	 */
 	public function getIncludeGroups()
 	{
-		return $this->$includeGroups;
+		return $this->includeGroups;
 	}
 
 	/**
@@ -65,7 +65,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	 */
 	public function setIncludeTags($includeTags)
 	{
-		$this->$includeTags = $includeTags;
+		$this->includeTags = $includeTags;
 	}
 
 	/**
@@ -73,7 +73,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	 */
 	public function getIncludeTags()
 	{
-		return $this->$includeTags;
+		return $this->includeTags;
 	}
 
 
@@ -94,6 +94,8 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	public function build() {
 		foreach($this->eventRepositoryBuilder->fetchAll() as $event) {
 			$eventMedias = null;
+			$eventGroups = null;
+			$eventTags = null;
 			if ($this->includeEventMedias) {
 				$mrb = new MediaRepositoryBuilder();
 				$mrb->setEvent($event);
