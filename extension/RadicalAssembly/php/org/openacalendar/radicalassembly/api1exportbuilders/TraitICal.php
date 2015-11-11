@@ -1,6 +1,6 @@
 <?php
 
-namespace api1exportbuilders;
+namespace org\openacalendar\radicalassembly\api1exportbuilders;
 
 /**
  *
@@ -13,15 +13,15 @@ namespace api1exportbuilders;
 
 
 trait TraitICal {
-	
-	
+
+
 	/**
 	 * Public for testing
 	 * @param type $key
 	 * @param type $value
-	 * @return type 
+	 * @return type
 	 */
-	public function getIcalLine($key,$value) {		
+	public function getIcalLine($key,$value) {
 		// should be wrapping long lines and escaping new lines
 		$value = str_replace("\\", "\\\\", $value);
 		$value = str_replace("\r", "", str_replace("\n", '\\n', $value));
@@ -43,12 +43,11 @@ trait TraitICal {
 			}
 			return $out;
 		} else {
-			return $out."\r\n";			
-		}		
+			return $out."\r\n";
+		}
 	}
-	
-	
-	
-	
-}
 
+
+
+
+}

@@ -1,6 +1,6 @@
 <?php
 
-namespace api1exportbuilders;
+namespace org\openacalendar\radicalassembly\api1exportbuilders;
 
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,20 +13,16 @@ use Symfony\Component\HttpFoundation\Response;
  * @author James Baster <james@jarofgreen.co.uk>
  */
 trait TraitJSON {
-	
-	
+
+
 	public function getResponse() {
-		global $CONFIG;	
+		global $CONFIG;
 		$response = new Response($this->getContents());
 		$response->headers->set('Content-Type', 'application/json');
 		$response->setPublic();
 		$response->setMaxAge($CONFIG->cacheFeedsInSeconds);
-		return $response;		
+		return $response;
 	}
-	
-	
+
+
 }
-
-
-
-	

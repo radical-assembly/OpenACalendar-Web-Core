@@ -1,6 +1,6 @@
 <?php
 
-namespace org\openacalendar\radicalassembly\siteapi2\controllers;
+namespace org\openacalendar\radicalassembly\siteapi1\controllers;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;

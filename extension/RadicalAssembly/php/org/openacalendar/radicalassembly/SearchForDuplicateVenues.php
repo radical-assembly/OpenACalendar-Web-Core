@@ -8,6 +8,8 @@
  * @author James Baster <james@jarofgreen.co.uk>
  */
 
+namespace org\openacalendar\radicalassembly;
+
 use models\VenueModel;
 use models\SiteModel;
 use repositories\builders\VenueRepositoryBuilder;
