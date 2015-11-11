@@ -10,11 +10,11 @@ use org\openacalendar\curatedlists\repositories\builders\CuratedListRepositoryBu
 
 /**
  *
- * @package Core
- * @link http://ican.openacalendar.org/ OpenACalendar Open Source Software
- * @license http://ican.openacalendar.org/license.html 3-clause BSD
- * @copyright (c) 2013-2014, JMB Technology Limited, http://jmbtechnology.co.uk/
- * @author James Baster <james@jarofgreen.co.uk>
+ * @package org.openacalendar.radicalassembly
+ * @link https://oac.radicalassembly.com/ Radical Assembly
+ * @license GTFO License
+ * @copyright (c) 2015, Elias Malik
+ * @author Elias Malik <elias0789@gmail.com>
  */
 class VenueListController
 {

@@ -6,7 +6,7 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use org\openacalendar\radicalassembly\api1exportbuilders\EventListICalBuilder;
 use org\openacalendar\radicalassembly\api1exportbuilders\EventListJSONBuilder;
-
+use org\openacalendar\curatedlists\repositories\CuratedListRepository;
 use repositories\builders\filterparams\EventFilterParams;
 
 /**
