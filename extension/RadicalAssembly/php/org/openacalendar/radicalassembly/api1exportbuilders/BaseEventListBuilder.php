@@ -1,7 +1,6 @@
 <?php
 namespace org\openacalendar\radicalassembly\api1exportbuilders;
 
-use repositories\builders\EventRepositoryBuilder;
 use models\SiteModel;
 use models\EventModel;
 use models\VenueModel;
@@ -9,6 +8,8 @@ use models\AreaModel;
 use models\CountryModel;
 use repositories\builders\MediaRepositoryBuilder;
 use repositories\builders\GroupRepositoryBuilder;
+use repositories\builders\TagRepositoryBuilder;
+use repositories\builders\EventRepositoryBuilder;
 
 /**
  *
