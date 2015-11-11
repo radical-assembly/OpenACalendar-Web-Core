@@ -16,7 +16,7 @@ use models\UserAccountModel;
 use models\EventEditMetaDataModel;
 use models\VenueEditMetaDataModel;
 use \SearchForDuplicateEvents;
-use \SearchForDuplicateVenues;
+use org\openacalendar\radicalassembly\SearchForDuplicateVenues;
 
 /**
  *

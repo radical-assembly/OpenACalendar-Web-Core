@@ -1,5 +1,5 @@
 <?php
-namespace api1exportbuilders;
+namespace org\openacalendar\radicalassembly\api1exportbuilders;
 
 use repositories\builders\EventRepositoryBuilder;
 use models\SiteModel;
@@ -16,15 +16,15 @@ use models\EventModel;
 abstract class BaseBuilder {
 
 	protected $title;
-	
+
 	/** @var SiteModel **/
 	protected $site;
 
 
-	
+
 	protected $localTimeZone;
-	
-	public function __construct(SiteModel $site = null, $timeZone = null, $title = null) {		
+
+	public function __construct(SiteModel $site = null, $timeZone = null, $title = null) {
 		global $CONFIG;
 		$this->site = $site;
 		$this->localTimeZone = new \DateTimeZone($timeZone ? $timeZone : "UTC");
@@ -37,18 +37,18 @@ abstract class BaseBuilder {
 		}
 	}
 
-	
+
 	abstract public function getContents();
 	abstract public function getResponse();
-	
-	
+
+
 	public function setTitle($title) {
 		$this->title = $title;
 		return $this;
 	}
 
 	protected $extraHeaders = array();
-	
+
 	public function addExtraHeader($html, $text) {
 		$this->extraHeaders[] = new ExportBuilderExtraHeaderOrFooter($html,$text);
 	}
@@ -58,7 +58,7 @@ abstract class BaseBuilder {
 	public function addExtraFooter($html, $text) {
 		$this->extraFooters[] = new ExportBuilderExtraHeaderOrFooter($html,$text);
 	}
-	
+
 }
 
 class ExportBuilderExtraHeaderOrFooter {
@@ -75,6 +75,3 @@ class ExportBuilderExtraHeaderOrFooter {
 		return $this->text;
 	}
 }
-
-
-

@@ -1,5 +1,5 @@
 <?php
-namespace api1exportbuilders;
+namespace org\openacalendar\radicalassembly\api1exportbuilders;
 
 use Symfony\Component\HttpFoundation\Response;
 use models\EventModel;
@@ -19,19 +19,19 @@ use models\CountryModel;
  */
 class EventListICalBuilder extends BaseEventListBuilder  {
 	use TraitICal;
-	
-	
-	
+
+
+
 	public function __construct(SiteModel $site = null, $timeZone  = null, $title = null) {
 		parent::__construct($site, $timeZone, $title);
 		// We go back a month, just so calendars have a bit of the past available.
 		$time = \TimeSource::getDateTime();
 		$time->sub(new \DateInterval("P30D"));
 		$this->eventRepositoryBuilder->setAfter($time);
-		
+
 	}
 
-	
+
 	public function getContents() {
 		global $CONFIG;
 		$txt = $this->getIcalLine('BEGIN','VCALENDAR');
@@ -46,22 +46,22 @@ class EventListICalBuilder extends BaseEventListBuilder  {
 		$txt .= $this->getIcalLine('END','VCALENDAR');
 		return $txt;
 	}
-	
+
 	public function getResponse() {
-		global $CONFIG;		
+		global $CONFIG;
 		$response = new Response($this->getContents());
 		$response->headers->set('Content-Type', 'text/calendar');
 		$response->setPublic();
 		$response->setMaxAge($CONFIG->cacheFeedsInSeconds);
-		return $response;				
+		return $response;
 	}
-	
+
 	public function addEvent(EventModel $event, $groups = array(), VenueModel $venue = null,
 							 AreaModel $area = null, CountryModel $country = null, $eventMedias = array()) {
 		global $CONFIG;
-		
+
 		$siteSlug = $this->site ? $this->site->getSlug() : $event->getSiteSlug();
-		
+
 		$txt = $this->getIcalLine('BEGIN','VEVENT');
 		$txt .= $this->getIcalLine('UID',$event->getSlug().'@'.$siteSlug.".".$CONFIG->webSiteDomain);
 
@@ -95,7 +95,7 @@ class EventListICalBuilder extends BaseEventListBuilder  {
 				$description .= "\n".$extraFooter->getText();
 			}
 			$txt .= $this->getIcalLine('DESCRIPTION',$description);
-			
+
 			$descriptionHTML = "<html><body>";
 			foreach($this->extraHeaders as $extraHeader) {
 				$descriptionHTML .= "<p>".$extraHeader->getHtml()."</p>";
@@ -110,7 +110,7 @@ class EventListICalBuilder extends BaseEventListBuilder  {
 			$descriptionHTML .= '</p>';
 			$descriptionHTML .= '</body></html>';
 			$txt .= $this->getIcalLine("X-ALT-DESC;FMTTYPE=text/html", $descriptionHTML);
-			
+
 			$locationDetails = array();
 			if ($event->getVenue() && $event->getVenue()->getTitle()) $locationDetails[] = $event->getVenue()->getTitle();
 			if ($event->getVenue() && $event->getVenue()->getAddress()) $locationDetails[] = $event->getVenue()->getAddress();
@@ -123,14 +123,12 @@ class EventListICalBuilder extends BaseEventListBuilder  {
 				$txt .= $this->getIcalLine('GEO',$event->getVenue()->getLat().";".$event->getVenue()->getLng());
 			}
 		}
-		
+
 		$txt .= $this->getIcalLine('DTSTART',$event->getStartAt()->format("Ymd")."T".$event->getStartAt()->format("His")."Z");
 		$txt .= $this->getIcalLine('DTEND',$event->getEndAt()->format("Ymd")."T".$event->getEndAt()->format("His")."Z");
-		
+
 		$txt .= $this->getIcalLine('END','VEVENT');
 		$this->events[] = $txt;
 	}
 
 }
-
-
