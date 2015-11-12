@@ -85,6 +85,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		$this->eventRepositoryBuilder->setLimit($CONFIG->api1EventListLimit);
 		$this->eventRepositoryBuilder->setIncludeCountryInformation(true);
 		$this->eventRepositoryBuilder->setIncludeAreaInformation(true);
+		$this->eventRepositoryBuilder->setIncludeVenueInformation(true);
 		if ($site) $this->eventRepositoryBuilder->setSite($site);
 	}
 
