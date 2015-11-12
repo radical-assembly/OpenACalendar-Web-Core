@@ -149,7 +149,7 @@ class EventListJSONBuilder extends BaseEventListBuilder {
 
 		if (is_array($eventTags)) {
 			$out['tags'] = array();
-			foreach ($tags as $tag) {
+			foreach ($eventTags as $tag) {
 				if (! $tag->getIsDeleted()) {
 					$out['tags'][] = $tag->getTitle();
 				}
