@@ -35,7 +35,7 @@ class LogInUserForm  extends AbstractType {
 			// if the app auto approves permissions we don't ask or tell the user anything about them.
 			$this->is_editor = $requestToken ? $requestToken->getIsEditor() : null;
 		}
-		$this->user = $user;
+		$this->user = ($user) ? $user : null;
 	}
 	
 	public function getIsEditor() {

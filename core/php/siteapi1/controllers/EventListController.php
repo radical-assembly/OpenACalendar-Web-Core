@@ -26,14 +26,14 @@ use repositories\builders\filterparams\EventFilterParams;
  * @author James Baster <james@jarofgreen.co.uk>
  */
 class EventListController {
-	
-	
+
+
 	function ical(Application $app) {
-		
+
 		$ical = new EventListICalBuilder($app['currentSite'], $app['currentTimeZone']);
 		$ical->build();
 		return $ical->getResponse();
-			
+
 	}
 
 	function json(Request $request, Application $app) {
@@ -42,9 +42,10 @@ class EventListController {
 
 		$json = new EventListJSONBuilder($app['currentSite'], $app['currentTimeZone']);
 		$json->setIncludeEventMedias($ourRequest->getGetOrPostBoolean("includeMedias",false));
+		$json->setIncludeGroups($ourRequest->getGetOrPostBoolean("includeGroups",true));
 		$json->build();
 		return $json->getResponse();
-			
+
 	}
 
 	function csv(Request $request, Application $app) {
@@ -67,28 +68,28 @@ class EventListController {
 		$jsonp->build();
 		if (isset($_GET['callback'])) $jsonp->setCallBackFunction($_GET['callback']);
 		return $jsonp->getResponse();
-			
+
 	}
-	
-	
+
+
 	function atomBefore(Request $request, Application $app) {
-		
+
 		$days = isset($_GET['days']) ? $_GET['days'] : null;
 		$atom = new EventListATOMBeforeBuilder($app['currentSite'], $app['currentTimeZone']);
 		$atom->setDaysBefore($days);
 		$atom->build();
 		return $atom->getResponse();
-	}	
-	
+	}
+
 
 	function atomCreate(Request $request, Application $app) {
-		
+
 		$atom = new EventListATOMCreateBuilder($app['currentSite'], $app['currentTimeZone']);
 		$atom->build();
 		return $atom->getResponse();
-	}	
-	
-	
+	}
+
+
 }
 
 

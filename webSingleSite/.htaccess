@@ -37,5 +37,7 @@ RewriteRule  ^media(.*)$ /index.php/media$1  [L]
 
 RewriteRule  ^sysadmin(.*)$ /gotosysadmin.php/sysadmin$1  [L]
 
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=204,L]
 
 ErrorDocument 404 /404.php
