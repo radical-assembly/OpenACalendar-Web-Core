@@ -15,7 +15,7 @@ use models\UserAccountModel;
  * @copyright (c) 2013-2015, JMB Technology Limited, http://jmbtechnology.co.uk/
  * @author James Baster <james@jarofgreen.co.uk>
  */
-class UserAccountRepository {
+class UserAccountRepository extends \repositories\UserAccountRepository {
 
 
 
@@ -25,17 +25,6 @@ class UserAccountRepository {
 				" JOIN user_in_curated_list_information ON user_in_curated_list_information.user_account_id = user_account_information.id ".
 				"WHERE user_in_curated_list_information.curated_list_id = :id AND user_in_curated_list_information.is_owner = 't'");
 		$stat->execute(array( 'id'=>$curatedList->getId() ));
-		if ($stat->rowCount() > 0) {
-			$user = new UserAccountModel();
-			$user->setFromDataBaseRow($stat->fetch());
-			return $user;
-		}
-	}
-
-	public function loadByUserName($userName) {
-		global $DB;
-		$stat = $DB->prepare("SELECT user_account_information.* FROM user_account_information WHERE username_canonical =:detail");
-		$stat->execute(array( 'detail'=>UserAccountModel::makeCanonicalUserName($userName) ));
 		if ($stat->rowCount() > 0) {
 			$user = new UserAccountModel();
 			$user->setFromDataBaseRow($stat->fetch());
