@@ -42,7 +42,6 @@ class EventListController {
 
 		$json = new EventListJSONBuilder($app['currentSite'], $app['currentTimeZone']);
 		$json->setIncludeEventMedias($ourRequest->getGetOrPostBoolean("includeMedias",false));
-		$json->setIncludeGroups($ourRequest->getGetOrPostBoolean("includeGroups",true));
 		$json->build();
 		return $json->getResponse();
 
@@ -91,5 +90,3 @@ class EventListController {
 
 
 }
-
-
