@@ -102,8 +102,7 @@ class SearchForDuplicateVenues {
 			$isEqualLat = abs( 1 - (float)$this->venue->getLat() / (float)$venue->getLat() ) < 1e-10;
 			$isEqualLng = abs( 1 - (float)$this->venue->getLng() / (float)$venue->getLng() ) < 1e-10;
 			if ($isEqualLat && $isEqualLng) {
-				$score++;
-				$score++;
+				$score += 2;
 			}
 		}
 
