@@ -6,6 +6,7 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use org\openacalendar\radicalassembly\api1exportbuilders\EventListICalBuilder;
 use org\openacalendar\radicalassembly\api1exportbuilders\EventListJSONBuilder;
+use org\openacalendar\radicalassembly\api1exportbuilders\EventListFullCalendarDataBuilder;
 use org\openacalendar\curatedlists\repositories\CuratedListRepository;
 use repositories\builders\filterparams\EventFilterParams;
 
@@ -67,6 +68,26 @@ class EventListController {
 		$json->setIncludeEventMedias($ourRequest->getGetOrPostBoolean("includeMedias", false));
         $json->setIncludeGroups($ourRequest->getGetOrPostBoolean("includeGroups", true));
 		$json->setIncludeTags($ourRequest->getGetOrPostBoolean("includeTags", true));
+		$json->build();
+		return $json->getResponse();
+
+	}
+
+	function fullcalendar($slug, Request $request, Application $app) {
+
+		$ourRequest = new \Request($request);
+
+		if (!$this->build($slug, $request, $app)) {
+			$app->abort(404, "curatedlist does not exist");
+		}
+
+		$json = new EventListFullCalendarDataBuilder($app['currentSite'], $app['currentTimeZone']);
+		$json->setCuratedList($this->parameters['curatedlist']);
+		$json->setTags($ourRequest->getGetOrPostString('tags', ''));
+		$json->setGroups($ourRequest->getGetOrPostString('groups', ''));
+		$json->setStartTime($ourRequest->getGetOrPostString('starttime', ''));
+		$json->setEndTime($ourRequest->getGetOrPostString('endtime', ''));
+
 		$json->build();
 		return $json->getResponse();
 
