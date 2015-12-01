@@ -43,13 +43,13 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
 
     public function setTags($tags) {
         if ($tags) {
-            $this->tags = explode(urlencode(","), $tags);
+            $this->tags = explode(",", $tags);
         }
     }
 
     public function setGroups($groups) {
         if ($groups) {
-            $this->groups = explode(urlencode(","), $groups);
+            $this->groups = explode(",", $groups);
         }
     }
 
