@@ -42,19 +42,27 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
     }
 
     public function setTags($tags) {
+        if ($tags) {
         $this->tags = explode(urlencode(","), $tags);
+    }
     }
 
     public function setGroups($groups) {
+        if ($groups) {
         $this->groups = explode(urlencode(","), $groups);
+    }
     }
 
     public function setStartTime($time) {
+        if ($time) {
         $this->startTime = new \DateTime($time);
+    }
     }
 
     public function setEndTime($time) {
+        if ($time) {
         $this->endTime = new \DateTime($time);
+    }
     }
 
 	public function addEvent(EventModel $event, $groups = null, VenueModel $venue = null,
