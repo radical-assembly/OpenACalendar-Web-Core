@@ -92,9 +92,8 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
             $tags = array_map(function($tag) {
                 return $tag->getTitle();
             }, $trb->fetchAll());
-            var_dump($tags);
             if (count(array_intersect($this->tags, $tags)) > 0) {
-                $out = array_merge($out, $event);
+                $out[] = $event;
             }
         }
         return $out;
@@ -108,7 +107,7 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
                 return $group->getTitle();
             }, $grb->fetchAll());
             if (count(array_intersect($this->groups, $groups)) > 0) {
-                $out = array_merge($out, $event);
+                $out[] = $event;
             }
         }
         return $out;
