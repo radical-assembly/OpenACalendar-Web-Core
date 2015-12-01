@@ -43,26 +43,26 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
 
     public function setTags($tags) {
         if ($tags) {
-        $this->tags = explode(urlencode(","), $tags);
-    }
+            $this->tags = explode(urlencode(","), $tags);
+        }
     }
 
     public function setGroups($groups) {
         if ($groups) {
-        $this->groups = explode(urlencode(","), $groups);
-    }
+            $this->groups = explode(urlencode(","), $groups);
+        }
     }
 
     public function setStartTime($time) {
         if ($time) {
-        $this->startTime = new \DateTime($time);
-    }
+            $this->startTime = new \DateTime($time);
+        }
     }
 
     public function setEndTime($time) {
         if ($time) {
-        $this->endTime = new \DateTime($time);
-    }
+            $this->endTime = new \DateTime($time);
+        }
     }
 
 	public function addEvent(EventModel $event, $groups = null, VenueModel $venue = null,
@@ -85,38 +85,54 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
 
 	}
 
+    protected function filterTags(TagRepositoryBuilder $trb, array $events) {
+        $out = array();
+        foreach ($events as $event) {
+            $trb->setTagsForEvent($event);
+            $tags = array_map(function($tag) {
+                return $tag->getTitle();
+            }, $trb->fetchAll());
+            var_dump($tags);
+            if (count(array_intersect($this->tags, $tags)) > 0) {
+                $out = array_merge($out, $event);
+            }
+        }
+        return $out;
+    }
+
+    protected function filterGroups(GroupRepositoryBuilder $grb, array $events) {
+        $out = array();
+        foreach ($events as $event) {
+            $grb->setEvent($event);
+            $groups = array_map(function($group) {
+                return $group->getTitle();
+            }, $grb->fetchAll());
+            if (count(array_intersect($this->groups, $groups)) > 0) {
+                $out = array_merge($out, $event);
+            }
+        }
+        return $out;
+    }
+
     public function build() {
-        $this->eventRepositoryBuilder->setAfter($this->startTime);
-        $this->eventRepositoryBuilder->setBefore($this->endTime);
+        if ($this->startTime) $this->eventRepositoryBuilder->setAfter($this->startTime);
+        if ($this->endTime) $this->eventRepositoryBuilder->setBefore($this->endTime);
 
-        if ($this->groups) {
-            $grb = new GroupRepositoryBuilder();
-            $grb->setSite($this->site);
-            $grb->setIncludeDeleted(false);
-            $groupModels = array();
-            foreach ($this->groups as $group) {
-                $grb->setFreeTextsearch($group);
-                $groupModels = array_merge($groupModels, $grb->fetchAll());
-            }
-            $this->eventRepositoryBuilder->setGroup($groupModels);
-        }
+        $trb = new TagRepositoryBuilder();
+        $trb->setSite($this->site);
+        $trb->setIncludeDeleted(false);
 
-        if ($this->tags) {
-            $trb = new TagRepositoryBuilder();
-            $trb->setSite($this->site);
-            $trb->setIncludeDeleted(false);
-            $tagModels = array();
-            foreach ($this->tags as $tag) {
-                $trb->setFreeTextsearch($tag);
-                $tagModels = array_merge($tagModels, $trb->fetchAll());
-            }
-            $this->eventRepositoryBuilder->setGroup($tagModels);
-        }
+        $grb = new GroupRepositoryBuilder();
+        $grb->setSite($this->site);
+        $grb->setIncludeDeleted(false);
 
-        foreach ($this->eventRepositoryBuilder-fetchAll() as $event) {
+        $events = $this->eventRepositoryBuilder->fetchAll();
+        if ($this->tags) $events = $this->filterTags($trb, $events);
+        if ($this->groups) $events = $this->filterGroups($grb, $events);
+
+        foreach ($events as $event) {
             $this->addEvent($event);
         }
-
     }
 
 }
