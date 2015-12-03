@@ -33,8 +33,7 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
 	}
 
     public function getContents() {
-        $out = array('data'=>$this->events);
-		return json_encode($out);
+		return json_encode($this->events);
     }
 
     public function setCuratedList(CuratedListModel $curatedlist) {
@@ -80,6 +79,12 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
         $endTimeZone = clone $event->getEndAt();
         $endTimeZone->setTimeZone(new \DateTimeZone($event->getTimezone()));
         $out['end'] = $startTimeZone->format(\DateTime::ATOM);
+
+        if ($event->getIsPhysical() && $event->getVenue()->hasLatLng()) {
+            $out['venueid'] = $event->getVenue()->getSlug();
+            $out['lat'] = $event->getVenue()->getLat();
+            $out['lng'] = $event->getVenue()->getLng();
+        }
 
 		$this->events[] = $out;
 
