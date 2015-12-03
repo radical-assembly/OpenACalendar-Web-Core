@@ -62,7 +62,6 @@ class EventListController {
 			$app->abort(404, "curatedlist does not exist.");
 		}
 
-
 		$json = new EventListJSONBuilder($app['currentSite'], $app['currentTimeZone']);
 		$json->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
 		$json->setIncludeEventMedias($ourRequest->getGetOrPostBoolean("includeMedias", false));
@@ -85,8 +84,8 @@ class EventListController {
 		$json->setCuratedList($this->parameters['curatedlist']);
 		$json->setTags($ourRequest->getGetOrPostString('tags', ''));
 		$json->setGroups($ourRequest->getGetOrPostString('groups', ''));
-		$json->setStartTime($ourRequest->getGetOrPostString('starttime', ''));
-		$json->setEndTime($ourRequest->getGetOrPostString('endtime', ''));
+		$json->setStartTime($ourRequest->getGetOrPostString('start', ''));
+		$json->setEndTime($ourRequest->getGetOrPostString('end', ''));
 
 		$json->build();
 		return $json->getResponse();
