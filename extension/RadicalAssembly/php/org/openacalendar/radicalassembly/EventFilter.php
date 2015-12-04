@@ -85,19 +85,8 @@ class EventFilter
             $tagsIntersect = true;
         }
 
-        if ($this->startTime) { // Positive time difference => event starts at or after after startTime
-            $interval = date_diff($event->getStartAt(), $this->startTime);
-            $isAfterStart = $interval->invert == 0;
-        } else {
-            $isAfterStart = true;
-        }
-
-        if ($this->endTime) { // Negative time difference => event finishes before endTime
-            $interval = date_diff($event->getEndAt(), $this->endTime);
-            $isBeforeEnd = $interval->invert == 1;
-        } else {
-            $isBeforeEnd = true;
-        }
+        $isAfterStart = ($this->startTime) ? $event->getStartAt()->getTimestamp() >= $this->startTime->getTimestamp() : true;
+        $isBeforeEnd = ($this->endTime) ? $event->getEndAt()->getTimestamp() < $this->endTime->getTimestamp() : true;
 
         return ( $groupsIntersect && $tagsIntersect && $isAfterStart && $isBeforeEnd );
     }
