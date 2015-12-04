@@ -10,18 +10,21 @@ use repositories\builders\MediaRepositoryBuilder;
 use repositories\builders\GroupRepositoryBuilder;
 use repositories\builders\TagRepositoryBuilder;
 use repositories\builders\EventRepositoryBuilder;
+use org\openacalendar\curatedlists\models\CuratedListModel;
+use org\openacalendar\radicalassembly\EventFilter;
 
 /**
  *
- * @package Core
- * @link http://ican.openacalendar.org/ OpenACalendar Open Source Software
- * @license http://ican.openacalendar.org/license.html 3-clause BSD
- * @copyright (c) 2013-2014, JMB Technology Limited, http://jmbtechnology.co.uk/
- * @author James Baster <james@jarofgreen.co.uk>
+ * @package org.openacalendar.radicalassembly
+ * @link https://oac.radicalassembly.com/ Radical Assembly
+ * @license GTFO License
+ * @copyright (c) 2015, Elias Malik
+ * @author Elias Malik <elias0789@gmail.com>
  */
 abstract class BaseEventListBuilder  extends BaseBuilder {
 
 	protected $eventRepositoryBuilder;
+	protected $filt;
 
 	protected $events = array();
 
@@ -87,14 +90,18 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		$this->eventRepositoryBuilder->setIncludeAreaInformation(true);
 		$this->eventRepositoryBuilder->setIncludeVenueInformation(true);
 		if ($site) $this->eventRepositoryBuilder->setSite($site);
+		$this->filt = new EventFilter();
 	}
 
 	abstract public function addEvent(EventModel $event, $groups = array(), VenueModel $venue = null,
-									  AreaModel $area = null, CountryModel $country = null, $eventTags = array(), $eventMedias = array());
+									  AreaModel $area = null, CountryModel $country = null,
+									  $eventTags = array(), $eventMedias = array());
 
 
 	public function build() {
-		foreach($this->eventRepositoryBuilder->fetchAll() as $event) {
+		$events = $this->filt->filterEventRepositoryBuilder($this->eventRepositoryBuilder);
+
+		foreach($events as $event) {
 			$eventMedias = null;
 			$eventGroups = null;
 			$eventTags = null;
@@ -122,7 +129,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	}
 
 	public function getEventRepositoryBuilder() { return $this->eventRepositoryBuilder; }
-
+	public function getEventFilter() {return $this->filt;}
 
 
 }
