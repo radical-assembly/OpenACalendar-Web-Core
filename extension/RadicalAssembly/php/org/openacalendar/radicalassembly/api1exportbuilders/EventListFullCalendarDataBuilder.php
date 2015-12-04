@@ -22,11 +22,6 @@ use org\openacalendar\curatedlists\models\CuratedListModel;
 class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
     use TraitJSON;
 
-    protected $tags;
-    protected $groups;
-    protected $startTime;
-    protected $endTime;
-
     public function __construct(SiteModel $site = null, $timeZone  = null) {
 		parent::__construct($site, $timeZone);
 		$this->eventRepositoryBuilder->setAfterNow();
@@ -34,34 +29,6 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
 
     public function getContents() {
 		return json_encode($this->events);
-    }
-
-    public function setCuratedList(CuratedListModel $curatedlist) {
-        $this->eventRepositoryBuilder->setCuratedList($curatedlist);
-    }
-
-    public function setTags($tags) {
-        if ($tags) {
-            $this->tags = explode(",", $tags);
-        }
-    }
-
-    public function setGroups($groups) {
-        if ($groups) {
-            $this->groups = explode(",", $groups);
-        }
-    }
-
-    public function setStartTime($time) {
-        if ($time) {
-            $this->startTime = new \DateTime($time);
-        }
-    }
-
-    public function setEndTime($time) {
-        if ($time) {
-            $this->endTime = new \DateTime($time);
-        }
     }
 
 	public function addEvent(EventModel $event, $groups = null, VenueModel $venue = null,
@@ -89,54 +56,5 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
 		$this->events[] = $out;
 
 	}
-
-    protected function filterTags(TagRepositoryBuilder $trb, array $events) {
-        $out = array();
-        foreach ($events as $event) {
-            $trb->setTagsForEvent($event);
-            $tags = array_map(function($tag) {
-                return $tag->getTitle();
-            }, $trb->fetchAll());
-            if (count(array_intersect($this->tags, $tags)) > 0) {
-                $out[] = $event;
-            }
-        }
-        return $out;
-    }
-
-    protected function filterGroups(GroupRepositoryBuilder $grb, array $events) {
-        $out = array();
-        foreach ($events as $event) {
-            $grb->setEvent($event);
-            $groups = array_map(function($group) {
-                return $group->getTitle();
-            }, $grb->fetchAll());
-            if (count(array_intersect($this->groups, $groups)) > 0) {
-                $out[] = $event;
-            }
-        }
-        return $out;
-    }
-
-    public function build() {
-        if ($this->startTime) $this->eventRepositoryBuilder->setAfter($this->startTime);
-        if ($this->endTime) $this->eventRepositoryBuilder->setBefore($this->endTime);
-
-        $trb = new TagRepositoryBuilder();
-        $trb->setSite($this->site);
-        $trb->setIncludeDeleted(false);
-
-        $grb = new GroupRepositoryBuilder();
-        $grb->setSite($this->site);
-        $grb->setIncludeDeleted(false);
-
-        $events = $this->eventRepositoryBuilder->fetchAll();
-        if ($this->tags) $events = $this->filterTags($trb, $events);
-        if ($this->groups) $events = $this->filterGroups($grb, $events);
-
-        foreach ($events as $event) {
-            $this->addEvent($event);
-        }
-    }
 
 }
