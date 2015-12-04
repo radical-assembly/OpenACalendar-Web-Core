@@ -43,12 +43,27 @@ class EventListController {
 
 	function ical($slug, Request $request, Application $app) {
 
+		$ourRequest = new \Request($request);
+
 		if (!$this->build($slug, $request, $app)) {
 			$app->abort(404, "curatedlist does not exist.");
 		}
 
 		$ical = new EventListICalBuilder($app['currentSite'], $app['currentTimeZone'], $this->parameters['curatedlist']->getTitle());
 		$ical->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
+
+		$tags = $ourRequest->getGetOrPostString('tags', '');
+		if ($tags) $ical->getEventFilter()->setTags(explode(',', $tags));
+
+		$groups = $ourRequest->getGetOrPostString('groups', '');
+		if ($groups) $ical->getEventFilter()->setGroups(explode(',', $groups));
+
+		$startAfter = $ourRequest->getGetOrPostString('start', '');
+		if ($startAfter) $ical->getEventFilter()->setStartTime(new \DateTime($startAfter));
+
+		$endBefore = $ourRequest->getGetOrPostString('end', '');
+		if ($endBefore) $ical->getEventFilter()->setEndTime(new \DateTime($endBefore));
+
 		$ical->build();
 		return $ical->getResponse();
 
@@ -81,11 +96,19 @@ class EventListController {
 		}
 
 		$json = new EventListFullCalendarDataBuilder($app['currentSite'], $app['currentTimeZone']);
-		$json->setCuratedList($this->parameters['curatedlist']);
-		$json->setTags($ourRequest->getGetOrPostString('tags', ''));
-		$json->setGroups($ourRequest->getGetOrPostString('groups', ''));
-		$json->setStartTime($ourRequest->getGetOrPostString('start', ''));
-		$json->setEndTime($ourRequest->getGetOrPostString('end', ''));
+		$json->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
+
+		$tags = $ourRequest->getGetOrPostString('tags', '');
+		if ($tags) $json->getEventFilter()->setTags(explode(',', $tags));
+
+		$groups = $ourRequest->getGetOrPostString('groups', '');
+		if ($groups) $json->getEventFilter()->setGroups(explode(',', $groups));
+
+		$startAfter = $ourRequest->getGetOrPostString('start', '');
+		if ($startAfter) $json->getEventFilter()->setStartTime(new \DateTime($startAfter));
+
+		$endBefore = $ourRequest->getGetOrPostString('end', '');
+		if ($endBefore) $json->getEventFilter()->setEndTime(new \DateTime($endBefore));
 
 		$json->build();
 		return $json->getResponse();
