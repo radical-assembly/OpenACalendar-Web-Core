@@ -99,24 +99,28 @@ class SearchForDuplicateVenues {
 		$score = 0;
 
 		if ($this->venue->hasLatLng() && $venue->hasLatLng()) {
-			$isEqualLat = abs( 1 - (float)$this->venue->getLat() / (float)$venue->getLat() ) < 1e-10;
-			$isEqualLng = abs( 1 - (float)$this->venue->getLng() / (float)$venue->getLng() ) < 1e-10;
+			$lat1 = (float)$this->venue->getLat();
+			$lat2 = (float)$venue->getLat();
+			$lng1 = (float)$this->venue->getLng();
+			$lng2 = (float)$venue->getLng();
+			$isEqualLat = abs($lat1-$lat2) < 1e-10 * max(abs($lat1), abs($lat2));
+			$isEqualLng = abs($lng1-$lng2) < 1e-10 * max(abs($lng1), abs($lng2));
 			if ($isEqualLat && $isEqualLng) {
 				$score += 2;
 			}
 		}
 
-		if ($this->venue->getTitle() && $this->venue->getTitle() == $venue->getTitle()) {
+		if ($this->venue->getTitle() && strtolower($this->venue->getTitle()) == strtolower($venue->getTitle())) {
 			$score++;
 		}
-		if ($this->venue->getAddress() && $this->venue->getAddress() == $venue->getAddress()) {
+		if ($this->venue->getAddress() && strtolower($this->venue->getAddress()) == strtolower($venue->getAddress())) {
 			$score++;
 		}
-		if ($this->venue->getAddressCode() && $this->venue->getAddressCode() == $venue->getAddressCode()) {
+		if ($this->venue->getAddressCode() && strtolower($this->venue->getAddressCode()) == strtolower($venue->getAddressCode())) {
 			$score++;
 		}
 		if ($this->venue->getDescription()) {
-			if ($this->venue->getDescription() == $venue->getDescription()) {
+			if (strtolower($this->venue->getDescription()) == strtolower($venue->getDescription())) {
 				$score++;
 			} else {
 				$bits1 = explode(" ", strtolower($this->venue->getDescription()));
