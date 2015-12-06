@@ -65,8 +65,8 @@ class EventController {
 			$venue->setCountryId($country->getId());
 
 			if (isset($eventData['venue_lat']) && isset($eventData['venue_lng'])) {
-			$venue->setLat($eventData['venue_lat']);
-			$venue->setLng($eventData['venue_lng']);
+				$venue->setLat($eventData['venue_lat']);
+				$venue->setLng($eventData['venue_lng']);
 			} else {
 				foreach ($app['extensions']->getExtensionsIncludingCore() as $extension) {
 					$extension->addDetailsToVenue($venue);
@@ -80,18 +80,31 @@ class EventController {
 					'success'=>false,
 					'msg'=>'Multiple duplicate venues detected'
 				));
-			} elseif ($venueDupes && count($venueDupes)>0) {
-				$event->setVenueId($venueDupes[0]->getId());
 			} else {
 				$editMetaData = new VenueEditMetaDataModel();
 				$editMetaData->setUserAccount($app['apiUser']);
-
 				$venueRepo = new VenueRepository();
-				$venueRepo->createWithMetaData($venue, $app['currentSite'], $editMetaData);
 
-				// Weak: only way I know of getting ID of newly created venue
-				$venueDupes = $searchForDuplicateVenues->getPossibleDuplicates();
-				$event->setVenueId($venueDupes[0]->getId());
+				if ($venueDupes && count($venueDupes)>0) {
+					if (! $venueDupes[0]->hasLatLng()) {
+						if ($venue->hasLatLng()) {
+							$venueDupes[0]->setLat($venue->getLat());
+							$venueDupes[0]->setLng($venue->getLng());
+						} else {
+							foreach ($app['extensions']->getExtensionsIncludingCore() as $extension) {
+								$extension->addDetailsToVenue($venueDupes[0]);
+							}
+						}
+					}
+					$venueRepo->editWithMetaData($venueDupes[0], $app['currentSite'], $editMetaData);
+					$event->setVenueId($venueDupes[0]->getId());
+				} else {
+					$venueRepo->createWithMetaData($venue, $app['currentSite'], $editMetaData);
+
+					// Weak: only way I know of getting ID of newly created venue
+					$venueDupes = $searchForDuplicateVenues->getPossibleDuplicates();
+					$event->setVenueId($venueDupes[0]->getId());
+				}
 			}
 		}
 
