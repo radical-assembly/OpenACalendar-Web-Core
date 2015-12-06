@@ -96,7 +96,7 @@ class EventController {
 							}
 						}
 					}
-					$venueRepo->editWithMetaData($venueDupes[0], $app['currentSite'], $editMetaData);
+					$venueRepo->editWithMetaData($venueDupes[0], $editMetaData);
 					$event->setVenueId($venueDupes[0]->getId());
 				} else {
 					$venueRepo->createWithMetaData($venue, $app['currentSite'], $editMetaData);
