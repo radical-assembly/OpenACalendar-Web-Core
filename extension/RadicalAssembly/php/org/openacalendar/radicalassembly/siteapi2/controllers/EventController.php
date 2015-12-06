@@ -62,9 +62,16 @@ class EventController {
 			$venue->setTitle($eventData['venue_name']);
 			$venue->setAddress($eventData['venue_address']);
 			$venue->setAddressCode($eventData['venue_code']);
+			$venue->setCountryId($country->getId());
+
+			if (isset($eventData['venue_lat']) && isset($eventData['venue_lng'])) {
 			$venue->setLat($eventData['venue_lat']);
 			$venue->setLng($eventData['venue_lng']);
-			$venue->setCountryId($country->getId());
+			} else {
+				foreach ($app['extensions']->getExtensionsIncludingCore() as $extension) {
+					$extension->addDetailsToVenue($venue);
+				}
+			}
 
 			$searchForDuplicateVenues = new SearchForDuplicateVenues($venue, $app['currentSite']);
 			$venueDupes = $searchForDuplicateVenues->getPossibleDuplicates();
