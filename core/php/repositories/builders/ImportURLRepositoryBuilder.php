@@ -94,6 +94,7 @@ class ImportURLRepositoryBuilder extends BaseRepositoryBuilder
 
     public function fetchAndAddFacebookEvents()
     {
+        print 'Fetching Facebook events';
         global $app;
 
         $siteRepo = new SiteRepositoryBuilder();
@@ -129,6 +130,8 @@ class ImportURLRepositoryBuilder extends BaseRepositoryBuilder
         $graphObject = $response->getGraphObject();
         $graphObjects = [$graphObject];
 
+        print 'Found '.count($graphObject->getPropertyAsArray('data')). ' events';
+
         while($graphObject->getProperty('paging') && $graphObject->getProperty('paging')->getProperty('next')) {
             $after = $graphObject->getProperty('paging')->getProperty('cursors')->getProperty('after');
             $url = '/me/events?after='.$after;
@@ -136,6 +139,7 @@ class ImportURLRepositoryBuilder extends BaseRepositoryBuilder
             $response = $request->execute();
             $graphObject = $response->getGraphObject();
             $graphObjects[] = $graphObject;
+            print 'Found '.count($graphObject->getPropertyAsArray('data')). ' more events';
         }
 
         /** @var GraphObject $graphObject */
@@ -144,6 +148,8 @@ class ImportURLRepositoryBuilder extends BaseRepositoryBuilder
             foreach($data as $event) {
                 $title = $event->getProperty('name');
                 $url = 'https://facebook.com/event/'.$event->getProperty('id');
+
+                print 'Adding '.$url;
 
                 $importurl = new ImportURLModel();
                 // we must setSiteId() here so loadClashForImportUrl() works
