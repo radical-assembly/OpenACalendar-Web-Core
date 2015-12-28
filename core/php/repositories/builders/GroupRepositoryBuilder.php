@@ -16,19 +16,19 @@ use models\UserAccountModel;
  * @author James Baster <james@jarofgreen.co.uk>
  */
 class GroupRepositoryBuilder  extends BaseRepositoryBuilder {
-	
+
 
 	/** @var SiteModel **/
 	protected $site;
-	
+
 	public function setSite(SiteModel $site) {
 		$this->site = $site;
 	}
-	
+
 
 	/** @var EventModel **/
 	protected $event;
-	
+
 	public function setEvent(EventModel $event) {
 		$this->event = $event;
 	}
@@ -45,7 +45,7 @@ class GroupRepositoryBuilder  extends BaseRepositoryBuilder {
 	public function setFreeTextsearch($freeTextSearch) {
 		$this->freeTextSearch = $freeTextSearch;
 	}
-	
+
 	protected $include_deleted = true;
 
 	public function setIncludeDeleted($value) {
@@ -85,7 +85,7 @@ class GroupRepositoryBuilder  extends BaseRepositoryBuilder {
 			$this->where[] =  " group_information.site_id = :site_id ";
 			$this->params['site_id'] = $this->site->getId();
 		}
-		
+
 		if ($this->event) {
 			$this->joins[] =  " JOIN event_in_group AS event_in_group ON event_in_group.group_id = group_information.id ".
 					"AND event_in_group.removed_at IS NULL AND event_in_group.event_id = :event_id ";
@@ -103,7 +103,7 @@ class GroupRepositoryBuilder  extends BaseRepositoryBuilder {
 					' ILIKE :free_text_search ';
 			$this->params['free_text_search'] = "%".strtolower($this->freeTextSearch)."%";
 		}
-		
+
 		if (!$this->include_deleted) {
 			$this->where[] = " group_information.is_deleted = '0' ";
 		}
@@ -121,39 +121,38 @@ class GroupRepositoryBuilder  extends BaseRepositoryBuilder {
 			$this->params['editedByUser'] = $this->editedByUser->getId();
 		}
 	}
-	
+
 	protected function buildStat() {
 				global $DB;
-		
-		
-		
+
+
+
 		$sql = "SELECT ".  implode(",", $this->select)." FROM group_information ".
 				implode(" ",$this->joins).
 				($this->where?" WHERE ".implode(" AND ", $this->where):"").
 				" ORDER BY group_information.title ASC ".( $this->limit > 0 ? " LIMIT ". $this->limit : "");
-	
+
 		$this->stat = $DB->prepare($sql);
 		$this->stat->execute($this->params);
 	}
-	
-	
+
+
 	public function fetchAll() {
-		
+
 		$this->buildStart();
 		$this->build();
 		$this->buildStat();
-		
 
-		
+
+
 		$results = array();
 		while($data = $this->stat->fetch()) {
-			$event = new GroupModel();
-			$event->setFromDataBaseRow($data);
-			$results[] = $event;
+			$group = new GroupModel();
+			$group->setFromDataBaseRow($data);
+			$results[] = $group;
 		}
 		return $results;
-		
+
 	}
 
 }
-
