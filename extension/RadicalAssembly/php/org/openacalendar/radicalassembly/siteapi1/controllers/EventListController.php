@@ -51,6 +51,7 @@ class EventListController {
 
 		$ical = new EventListICalBuilder($app['currentSite'], $app['currentTimeZone'], $this->parameters['curatedlist']->getTitle());
 		$ical->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
+		$ical->setIncludeNextOnly($ourRequest->getGetOrPostBoolean("includeNextOnly", false));
 
 		$tags = $ourRequest->getGetOrPostString('tags', '');
 		if ($tags) $ical->getEventFilter()->setTags(explode(',', $tags));
@@ -82,6 +83,20 @@ class EventListController {
 		$json->setIncludeEventMedias($ourRequest->getGetOrPostBoolean("includeMedias", false));
         $json->setIncludeGroups($ourRequest->getGetOrPostBoolean("includeGroups", true));
 		$json->setIncludeTags($ourRequest->getGetOrPostBoolean("includeTags", true));
+		$json->setIncludeNextOnly($ourRequest->getGetOrPostBoolean("includeNextOnly", false));
+
+		$tags = $ourRequest->getGetOrPostString('tags', '');
+		if ($tags) $json->getEventFilter()->setTags(explode(',', $tags));
+
+		$groups = $ourRequest->getGetOrPostString('groups', '');
+		if ($groups) $json->getEventFilter()->setGroups(explode(',', $groups));
+
+		$startAfter = $ourRequest->getGetOrPostString('start', '');
+		if ($startAfter) $json->getEventFilter()->setStartTime(new \DateTime($startAfter));
+
+		$endBefore = $ourRequest->getGetOrPostString('end', '');
+		if ($endBefore) $json->getEventFilter()->setEndTime(new \DateTime($endBefore));
+
 		$json->build();
 		return $json->getResponse();
 
@@ -97,6 +112,7 @@ class EventListController {
 
 		$json = new EventListFullCalendarDataBuilder($app['currentSite'], $app['currentTimeZone']);
 		$json->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
+		$json->setIncludeNextOnly($ourRequest->getGetOrPostBoolean("includeNextOnly", false));
 
 		$tags = $ourRequest->getGetOrPostString('tags', '');
 		if ($tags) $json->getEventFilter()->setTags(explode(',', $tags));
