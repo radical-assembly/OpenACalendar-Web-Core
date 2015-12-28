@@ -95,8 +95,7 @@
 		  // have logged in to the app.
 		  FBResponse  =  FB.getAuthResponse();
 		  document.getElementById('accesstoken').value = FBResponse.accessToken;
-			alert(FBResponse.accessToken);
-		  //document.newfacebookaccesstokenform.submit();
+		  document.newfacebookaccesstokenform.submit();
 		} else if (response.status === 'not_authorized') {
 		  // In this case, the person is logged into Facebook, but not into the app, so we call
 		  // FB.login() to prompt them to do so. 
