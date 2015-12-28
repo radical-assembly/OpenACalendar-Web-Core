@@ -16,3 +16,4 @@ $app->match('/api1/radicalassembly/list/{slug}/events.ical', "org\openacalendar\
 		->assert('slug', FRIENDLY_SLUG_REGEX);
 
 $app->match('/api1/radicalassembly/venues.json', "org\openacalendar\\radicalassembly\siteapi1\controllers\VenueListController::listJson");
+$app->match('/api1/radicalassembly/tags.json', "org\openacalendar\\radicalassembly\siteapi1\controllers\TagListController::listJson");
