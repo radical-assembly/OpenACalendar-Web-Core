@@ -106,7 +106,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		$this->eventRepositoryBuilder->setIncludeCountryInformation(true);
 		$this->eventRepositoryBuilder->setIncludeAreaInformation(true);
 		$this->eventRepositoryBuilder->setIncludeVenueInformation(true);
-		$this->eventRepositoryBuilder->setOrderByStartAt(true);
+		$this->eventRepositoryBuilder->setOrderByStartAt(false); // Soonest to furthest in future
 		if ($site) $this->eventRepositoryBuilder->setSite($site);
 		$this->filt = new EventFilter();
 	}
