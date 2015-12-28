@@ -47,7 +47,7 @@ class EventListFullCalendarDataBuilder extends BaseEventListBuilder {
         $endTimeZone->setTimeZone(new \DateTimeZone($event->getTimezone()));
         $out['end'] = $startTimeZone->format(\DateTime::ATOM);
 
-        if ($event->getIsPhysical() && $event->getVenue()->hasLatLng()) {
+        if ($event->getIsPhysical() && $event->getVenue() && $event->getVenue()->hasLatLng()) {
             $out['venueid'] = $event->getVenue()->getSlug();
             $out['lat'] = $event->getVenue()->getLat();
             $out['lng'] = $event->getVenue()->getLng();
