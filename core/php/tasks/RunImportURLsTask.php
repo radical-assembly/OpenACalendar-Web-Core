@@ -61,6 +61,8 @@ class RunImportURLsTask extends \BaseTask  {
 
 		$iurlBuilder = new ImportURLRepositoryBuilder();
 
+		$iurlBuilder->fetchAndAddFacebookEvents();
+
 		foreach($iurlBuilder->fetchAll() as $importURL) {
 
 			$site = $siteRepo->loadById($importURL->getSiteID());

@@ -2,6 +2,8 @@
 
 namespace org\openacalendar\facebook;
 
+use appconfiguration\AppConfigurationManager;
+use BaseExtension;
 use import\ImportURLHandlerBase;
 use import\ImportedEventsToEvents;
 use Facebook\FacebookSession;
@@ -28,11 +30,13 @@ class ImportURLFacebookHandler extends ImportURLHandlerBase {
 	
 	public function canHandle() {
 		global $app;
-		
+		/** @var BaseExtension $extension */
 		$extension = $app['extensions']->getExtensionById('org.openacalendar.facebook');
-		$appID = $app['appconfig']->getValue($extension->getAppConfigurationDefinition('app_id'));
-		$appSecret = $app['appconfig']->getValue($extension->getAppConfigurationDefinition('app_secret'));
-		$userToken = $app['appconfig']->getValue($extension->getAppConfigurationDefinition('user_token'));
+		/** @var AppConfigurationManager $config */
+		$config = $app['appconfig'];
+		$appID = $config->getValue($extension->getAppConfigurationDefinition('app_id'));
+		$appSecret = $config->getValue($extension->getAppConfigurationDefinition('app_secret'));
+		$userToken = $config->getValue($extension->getAppConfigurationDefinition('user_token'));
 		
 		$urlBits = parse_url($this->importURLRun->getRealURL());
 		
