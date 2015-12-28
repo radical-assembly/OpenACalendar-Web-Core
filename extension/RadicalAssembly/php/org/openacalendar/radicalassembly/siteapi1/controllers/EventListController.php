@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Request;
 use org\openacalendar\radicalassembly\api1exportbuilders\EventListICalBuilder;
 use org\openacalendar\radicalassembly\api1exportbuilders\EventListJSONBuilder;
 use org\openacalendar\radicalassembly\api1exportbuilders\EventListFullCalendarDataBuilder;
+use org\openacalendar\radicalassembly\api1exportbuilders\EventListATOMCreateBuilder;
+use org\openacalendar\radicalassembly\api1exportbuilders\EventListATOMBeforeBuilder;
 use org\openacalendar\curatedlists\repositories\CuratedListRepository;
 use repositories\builders\filterparams\EventFilterParams;
 
@@ -128,6 +130,66 @@ class EventListController {
 
 		$json->build();
 		return $json->getResponse();
+
+	}
+
+
+	function atomCreate($slug, Request $request, Application $app) {
+
+		$ourRequest = new \Request($request);
+
+		if (!$this->build($slug, $request, $app)) {
+			$app->abort(404, "curatedlist does not exist");
+		}
+
+		$atom = new EventListATOMCreateBuilder($app['currentSite'], $app['currentTimeZone']);
+		$atom->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
+		$atom->setIncludeNextOnly($ourRequest->getGetOrPostBoolean("includeNextOnly", false));
+
+		$tags = $ourRequest->getGetOrPostString('tags', '');
+		if ($tags) $atom->getEventFilter()->setTags(explode(',', $tags));
+
+		$groups = $ourRequest->getGetOrPostString('groups', '');
+		if ($groups) $atom->getEventFilter()->setGroups(explode(',', $groups));
+
+		$startAfter = $ourRequest->getGetOrPostString('start', '');
+		if ($startAfter) $atom->getEventFilter()->setStartTime(new \DateTime($startAfter));
+
+		$endBefore = $ourRequest->getGetOrPostString('end', '');
+		if ($endBefore) $atom->getEventFilter()->setEndTime(new \DateTime($endBefore));
+
+		$atom->build();
+		return $atom->getResponse();
+
+	}
+
+	function atomBefore($slug, Request $request, Application $app) {
+
+		$ourRequest = new \Request($request);
+
+		if (!$this->build($slug, $request, $app)) {
+			$app->abort(404, "curatedlist does not exist");
+		}
+
+		$atom = new EventListATOMBeforeBuilder($app['currentSite'], $app['currentTimeZone']);
+		$atom->getEventRepositoryBuilder()->setCuratedList($this->parameters['curatedlist']);
+		$atom->setIncludeNextOnly($ourRequest->getGetOrPostBoolean("includeNextOnly", false));
+		$atom->setDaysBefore($ourRequest->getGetOrPostString("days", null));
+
+		$tags = $ourRequest->getGetOrPostString('tags', '');
+		if ($tags) $atom->getEventFilter()->setTags(explode(',', $tags));
+
+		$groups = $ourRequest->getGetOrPostString('groups', '');
+		if ($groups) $atom->getEventFilter()->setGroups(explode(',', $groups));
+
+		$startAfter = $ourRequest->getGetOrPostString('start', '');
+		if ($startAfter) $atom->getEventFilter()->setStartTime(new \DateTime($startAfter));
+
+		$endBefore = $ourRequest->getGetOrPostString('end', '');
+		if ($endBefore) $atom->getEventFilter()->setEndTime(new \DateTime($endBefore));
+
+		$atom->build();
+		return $atom->getResponse();
 
 	}
 
