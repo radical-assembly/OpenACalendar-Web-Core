@@ -37,15 +37,17 @@ class VenueListController
 		foreach($vrb->fetchAll() as $venue) {
             $events = $venue->getCachedFutureEvents();
             $cachedEvents = array();
-            foreach($events as $event) {
-                $lrb->setContainsEvent($event);
-                $lists = $lrb->fetchAll();
-                foreach($lists as $list) {
-                    if ($list->getTitle() === $listTitle) {
-                        $cachedEvents[] = $event;
-                    }
-                }
-            }
+			if ($events && is_array($events)) {
+				foreach($events as $event) {
+	                $lrb->setContainsEvent($event);
+	                $lists = $lrb->fetchAll();
+	                foreach($lists as $list) {
+	                    if ($list->getTitle() === $listTitle) {
+	                        $cachedEvents[] = $event;
+	                    }
+	                }
+	            }
+			}
 			$out['venues'][] = array(
 				'slug'=>$venue->getSlug(),
 				'slugForURL'=>$venue->getSlugForUrl(),
