@@ -31,6 +31,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 	protected $includeEventMedias = false;
 	protected $includeGroups = false;
 	protected $includeTags = false;
+	protected $includeNextOnly = false;
 
 	/**
 	 * @param boolean $includeEventMedias
@@ -80,6 +81,22 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		return $this->includeTags;
 	}
 
+	/**
+	 * @param boolean $includeNextOnly
+	 */
+	public function setIncludeNextOnly($includeNextOnly)
+	{
+		$this->includeNextOnly = $includeNextOnly;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getIncludeNextOnly()
+	{
+		return $this->includeNextOnly;
+	}
+
 
 	public function __construct(SiteModel $site = null, $timeZone = null, $title = null) {
 		parent::__construct($site, $timeZone, $title);
@@ -89,6 +106,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 		$this->eventRepositoryBuilder->setIncludeCountryInformation(true);
 		$this->eventRepositoryBuilder->setIncludeAreaInformation(true);
 		$this->eventRepositoryBuilder->setIncludeVenueInformation(true);
+		$this->eventRepositoryBuilder->setOrderByStartAt(true);
 		if ($site) $this->eventRepositoryBuilder->setSite($site);
 		$this->filt = new EventFilter();
 	}
@@ -100,6 +118,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 
 	public function build() {
 		$events = $this->filt->filterEventRepositoryBuilder($this->eventRepositoryBuilder);
+		$events = ($this->includeNextOnly) ? $events[0] : $events;
 
 		foreach($events as $event) {
 			$eventMedias = null;
