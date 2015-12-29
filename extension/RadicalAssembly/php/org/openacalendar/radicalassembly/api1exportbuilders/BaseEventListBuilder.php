@@ -118,7 +118,7 @@ abstract class BaseEventListBuilder  extends BaseBuilder {
 
 	public function build() {
 		$events = $this->filt->filterEventRepositoryBuilder($this->eventRepositoryBuilder);
-		$events = ($this->includeNextOnly) ? array($events[0]) : $events;
+		$events = ($events && $this->includeNextOnly) ? array(array_values($events)[0]) : $events;
 
 		foreach($events as $event) {
 			$eventMedias = null;
